@@ -5,395 +5,193 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ENIGMA // FIELD OPERATIONS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Oswald:wght@300;400;600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Oswald:wght@300;400;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  :root {
-    --green: #00ff88;
-    --green-dim: #00cc66;
-    --green-dark: #003322;
-    --amber: #ffb800;
-    --amber-dim: #cc9200;
-    --red: #ff3344;
-    --red-dim: #cc1122;
-    --bg: #050a07;
-    --bg2: #0a1410;
-    --bg3: #0f1e18;
-    --panel: #0d1a14;
-    --border: #1a3328;
-    --border-lit: #2a5542;
-    --text: #c8ffe0;
-    --text-dim: #5a8870;
-    --text-muted: #2a5040;
-    --scanline: rgba(0,255,136,0.02);
-  }
+:root{
+  --green:#00ff88;--green-dim:#00cc66;--green-dark:#003322;
+  --amber:#ffb800;--amber-dim:#cc9200;
+  --red:#ff3344;--red-dim:#cc1122;
+  --bg:#050a07;--bg2:#0a1410;--panel:#0d1a14;
+  --border:#1a3328;--border-lit:#2a5542;
+  --text:#c8ffe0;--text-dim:#5a8870;--text-muted:#2a5040;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Share Tech Mono',monospace;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,rgba(0,255,136,.018) 0px,transparent 1px,transparent 3px);pointer-events:none;z-index:9999;}
 
-  * { margin:0; padding:0; box-sizing:border-box; }
+/* ── HEADER ── */
+.header{border-bottom:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;background:var(--bg2);}
+.logo{font-family:'Oswald',sans-serif;font-weight:600;font-size:22px;letter-spacing:8px;color:var(--green);text-shadow:0 0 20px rgba(0,255,136,.4);}
+.logo span{color:var(--text-dim);font-weight:300;font-size:11px;letter-spacing:4px;display:block;margin-top:2px;}
+.status-bar{display:flex;gap:20px;align-items:center;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 7px var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.status-label{font-size:11px;color:var(--text-dim);letter-spacing:2px;}
+.clock{font-size:12px;color:var(--green-dim);letter-spacing:2px;}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Share Tech Mono', monospace;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+/* ── NAV ── */
+.nav{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 32px;}
+.nav-btn{background:none;border:none;cursor:pointer;padding:13px 22px;font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:3px;color:var(--text-dim);border-bottom:2px solid transparent;transition:all .2s;}
+.nav-btn:hover{color:var(--text);}
+.nav-btn.active{color:var(--green);border-bottom-color:var(--green);}
 
-  body::before {
-    content:'';
-    position:fixed; top:0; left:0; right:0; bottom:0;
-    background: repeating-linear-gradient(
-      0deg,
-      var(--scanline) 0px,
-      transparent 1px,
-      transparent 3px
-    );
-    pointer-events:none;
-    z-index:9999;
-  }
+.main{padding:28px 32px;max-width:1400px;margin:0 auto;}
 
-  /* ─── HEADER ─── */
-  .header {
-    border-bottom: 1px solid var(--border);
-    padding: 20px 32px;
-    display:flex; align-items:center; justify-content:space-between;
-    background: var(--bg2);
-  }
-  .logo {
-    font-family: 'Oswald', sans-serif;
-    font-weight: 600;
-    font-size: 24px;
-    letter-spacing: 8px;
-    color: var(--green);
-    text-shadow: 0 0 20px rgba(0,255,136,0.4);
-  }
-  .logo span { color: var(--text-dim); font-weight: 300; font-size: 12px; letter-spacing: 4px; display:block; margin-top:2px; }
-  .status-bar {
-    display:flex; gap:24px; align-items:center;
-  }
-  .status-dot {
-    width:8px; height:8px; border-radius:50%;
-    background: var(--green);
-    box-shadow: 0 0 8px var(--green);
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  .status-label { font-size:11px; color: var(--text-dim); letter-spacing:2px; }
-  .clock { font-size:13px; color: var(--green-dim); letter-spacing:2px; }
+/* ── PANELS ── */
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:2px;padding:22px;margin-bottom:18px;}
+.ph{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:13px;border-bottom:1px solid var(--border);}
+.pt{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:4px;color:var(--green);}
+.pb{font-size:10px;padding:2px 8px;border:1px solid var(--border-lit);color:var(--text-dim);letter-spacing:2px;}
 
-  /* ─── NAV ─── */
-  .nav {
-    display:flex; gap:0;
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    padding: 0 32px;
-  }
-  .nav-btn {
-    background: none; border: none; cursor: pointer;
-    padding: 14px 24px;
-    font-family: 'Oswald', sans-serif;
-    font-size: 13px;
-    letter-spacing: 3px;
-    color: var(--text-dim);
-    border-bottom: 2px solid transparent;
-    transition: all 0.2s;
-  }
-  .nav-btn:hover { color: var(--text); }
-  .nav-btn.active {
-    color: var(--green);
-    border-bottom-color: var(--green);
-  }
+/* ── FORMS ── */
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11px;letter-spacing:2px;color:var(--text-dim);margin-bottom:5px;}
+.field input,.field textarea,.field select{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:13px;padding:9px 12px;outline:none;transition:border-color .2s;border-radius:1px;}
+.field input:focus,.field textarea:focus{border-color:var(--green-dim);box-shadow:0 0 0 1px rgba(0,255,136,.08);}
+.field textarea{resize:vertical;min-height:90px;line-height:1.6;}
 
-  /* ─── MAIN LAYOUT ─── */
-  .main { padding: 32px; max-width: 1400px; margin: 0 auto; }
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:7px;background:none;border:1px solid var(--green-dim);color:var(--green);font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:3px;padding:9px 20px;cursor:pointer;transition:all .2s;border-radius:1px;}
+.btn:hover{background:rgba(0,255,136,.07);box-shadow:0 0 10px rgba(0,255,136,.12);}
+.btn:active{transform:scale(.98);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn.ba{border-color:var(--amber-dim);color:var(--amber);}
+.btn.ba:hover{background:rgba(255,184,0,.07);}
+.btn.br{border-color:var(--red-dim);color:var(--red);}
+.btn.br:hover{background:rgba(255,51,68,.07);}
+.btn.bf{width:100%;justify-content:center;}
+.btn.bs{padding:5px 10px;font-size:10px;letter-spacing:2px;}
 
-  /* ─── PANELS ─── */
-  .panel {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    padding: 24px;
-    margin-bottom: 20px;
-  }
-  .panel-header {
-    display:flex; align-items:center; gap:12px;
-    margin-bottom: 20px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid var(--border);
-  }
-  .panel-title {
-    font-family: 'Oswald', sans-serif;
-    font-size: 14px;
-    letter-spacing: 4px;
-    color: var(--green);
-  }
-  .panel-badge {
-    font-size: 10px;
-    padding: 2px 8px;
-    border: 1px solid var(--border-lit);
-    color: var(--text-dim);
-    letter-spacing: 2px;
-  }
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
 
-  /* ─── FORMS ─── */
-  .field { margin-bottom: 16px; }
-  .field label {
-    display:block;
-    font-size: 11px;
-    letter-spacing: 2px;
-    color: var(--text-dim);
-    margin-bottom: 6px;
-  }
-  .field input, .field textarea, .field select {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 14px;
-    padding: 10px 14px;
-    outline: none;
-    transition: border-color 0.2s;
-    border-radius: 1px;
-  }
-  .field input:focus, .field textarea:focus, .field select:focus {
-    border-color: var(--green-dim);
-    box-shadow: 0 0 0 1px rgba(0,255,136,0.1);
-  }
-  .field textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
-  .field select option { background: var(--bg2); }
+/* ── STATS ── */
+.stat-row{display:flex;gap:14px;margin-bottom:18px;}
+.sc{flex:1;background:var(--bg);border:1px solid var(--border);padding:14px 18px;}
+.sn{font-family:'Oswald',sans-serif;font-size:30px;color:var(--green);line-height:1;}
+.sl{font-size:10px;letter-spacing:2px;color:var(--text-dim);margin-top:3px;}
+.sc.sw .sn{color:var(--amber);}
+.sc.sd .sn{color:var(--red);}
 
-  .btn {
-    display: inline-flex; align-items:center; gap:8px;
-    background: none;
-    border: 1px solid var(--green-dim);
-    color: var(--green);
-    font-family: 'Oswald', sans-serif;
-    font-size: 13px;
-    letter-spacing: 3px;
-    padding: 10px 24px;
-    cursor: pointer;
-    transition: all 0.2s;
-    border-radius: 1px;
-  }
-  .btn:hover {
-    background: rgba(0,255,136,0.08);
-    box-shadow: 0 0 12px rgba(0,255,136,0.15);
-  }
-  .btn:active { transform: scale(0.98); }
-  .btn.btn-amber {
-    border-color: var(--amber-dim);
-    color: var(--amber);
-  }
-  .btn.btn-amber:hover { background: rgba(255,184,0,0.08); }
-  .btn.btn-red {
-    border-color: var(--red-dim);
-    color: var(--red);
-  }
-  .btn.btn-red:hover { background: rgba(255,51,68,0.08); }
-  .btn.btn-full { width: 100%; justify-content: center; }
-  .btn.btn-sm { padding: 6px 14px; font-size: 11px; letter-spacing: 2px; }
+/* ── TABS ── */
+.tab-row{display:flex;border-bottom:1px solid var(--border);margin-bottom:18px;}
+.tab-btn{background:none;border:none;cursor:pointer;padding:9px 18px;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;color:var(--text-dim);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;}
+.tab-btn:hover{color:var(--text);}
+.tab-btn.active{color:var(--green);border-bottom-color:var(--green);}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
 
-  /* ─── GRID ─── */
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+/* ── AGENT TABLE ── */
+.agent-table{width:100%;border-collapse:collapse;}
+.agent-table th{text-align:left;font-size:10px;letter-spacing:3px;color:var(--text-muted);padding:7px 10px;border-bottom:1px solid var(--border);font-weight:400;}
+.agent-table td{padding:10px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle;}
+.agent-table tr:hover td{background:rgba(0,255,136,.02);}
+.cn{color:var(--green);font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:3px;}
+.aok{color:var(--green-dim);font-size:11px;}
+.awk{color:var(--amber);font-size:11px;}
+.afg{color:var(--red);font-size:11px;animation:flicker 1s infinite;}
+@keyframes flicker{0%,100%{opacity:1}50%{opacity:.55}}
 
-  /* ─── AGENT TABLE ─── */
-  .agent-table { width:100%; border-collapse: collapse; }
-  .agent-table th {
-    text-align: left;
-    font-size: 10px;
-    letter-spacing: 3px;
-    color: var(--text-muted);
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--border);
-    font-weight: 400;
-  }
-  .agent-table td {
-    padding: 12px;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-  }
-  .agent-table tr:hover td { background: rgba(0,255,136,0.03); }
-  .codename {
-    color: var(--green);
-    font-family: 'Oswald', sans-serif;
-    font-size: 15px;
-    letter-spacing: 3px;
-  }
-  .pass-code { color: var(--amber); font-size: 12px; letter-spacing: 1px; }
-  .key-badge {
-    background: var(--green-dark);
-    color: var(--green);
-    padding: 3px 10px;
-    font-size: 11px;
-    letter-spacing: 2px;
-    border: 1px solid var(--border-lit);
-  }
-  .access-ok { color: var(--green-dim); font-size: 11px; }
-  .access-warn { color: var(--amber); font-size: 11px; }
-  .access-danger { color: var(--red); font-size: 11px; animation: flicker 1s infinite; }
-  @keyframes flicker { 0%,100%{opacity:1} 50%{opacity:0.6} }
+/* inline edit inputs inside table */
+.edit-input{background:var(--bg);border:1px solid var(--border-lit);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:12px;padding:5px 8px;outline:none;border-radius:1px;width:100%;}
+.edit-input:focus{border-color:var(--green-dim);}
+.edit-row td{background:rgba(0,255,136,.04)!important;}
 
-  /* ─── LOG ENTRIES ─── */
-  .log-list { list-style: none; }
-  .log-entry {
-    display:flex; align-items:flex-start; gap:12px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 12px;
-  }
-  .log-time { color: var(--text-muted); min-width: 80px; }
-  .log-agent { color: var(--green); min-width: 110px; letter-spacing: 2px; }
-  .log-msg { color: var(--text-dim); flex:1; }
-  .log-flag { color: var(--red); font-size: 10px; letter-spacing: 1px; }
+/* ── LOG ── */
+.log-list{list-style:none;}
+.log-entry{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:11px;}
+.lt{color:var(--text-muted);min-width:105px;}
+.la{color:var(--green);min-width:100px;letter-spacing:2px;}
+.lm{color:var(--text-dim);flex:1;}
+.lfw{color:var(--amber);font-size:10px;letter-spacing:1px;}
+.lff{color:var(--red);font-size:10px;letter-spacing:1px;animation:flicker 1s infinite;}
 
-  /* ─── MESSAGE DECODE ─── */
-  .decode-result {
-    background: var(--bg);
-    border: 1px solid var(--border-lit);
-    padding: 16px;
-    margin-top: 16px;
-    font-size: 14px;
-    line-height: 1.8;
-    color: var(--green);
-    letter-spacing: 1px;
-    min-height: 60px;
-  }
-  .decode-meta {
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-bottom: 8px;
-    letter-spacing: 1px;
-  }
+/* ── DECODE ── */
+.decode-result{background:var(--bg);border:1px solid var(--border-lit);padding:14px;margin-top:14px;font-size:13px;line-height:1.8;color:var(--green);letter-spacing:1px;min-height:50px;}
+.decode-meta{font-size:11px;color:var(--text-dim);margin-bottom:7px;letter-spacing:1px;}
 
-  /* ─── AGENT LOGIN ─── */
-  .agent-login-wrap {
-    max-width: 440px; margin: 0 auto;
-  }
-  .terminal-header {
-    font-size: 11px;
-    color: var(--text-muted);
-    letter-spacing: 2px;
-    margin-bottom: 8px;
-  }
-  .blink { animation: blink 1s step-end infinite; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+/* ── CIPHER ── */
+.cipher-display{background:var(--bg);border:1px solid var(--border);padding:14px;font-size:11px;letter-spacing:2px;color:var(--text-dim);word-break:break-all;line-height:2;font-family:'Space Mono',monospace;}
 
-  /* ─── CIPHER VISUAL ─── */
-  .cipher-display {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    padding: 16px;
-    font-size: 12px;
-    letter-spacing: 3px;
-    color: var(--text-dim);
-    word-break: break-all;
-    line-height: 2;
-    font-family: 'Space Mono', monospace;
-  }
-  .cipher-display .highlight { color: var(--green); }
+/* ── TOAST ── */
+.toast{position:fixed;bottom:28px;right:28px;background:var(--bg2);border:1px solid var(--border-lit);padding:12px 20px;font-size:11px;letter-spacing:2px;color:var(--green);z-index:10000;transform:translateY(70px);opacity:0;transition:all .3s;max-width:340px;line-height:1.5;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.terr{border-color:var(--red-dim);color:var(--red);}
+.toast.twrn{border-color:var(--amber-dim);color:var(--amber);}
 
-  /* ─── STATS ─── */
-  .stat-row { display:flex; gap:16px; margin-bottom: 20px; }
-  .stat-card {
-    flex:1;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    padding: 16px 20px;
-  }
-  .stat-num {
-    font-family: 'Oswald', sans-serif;
-    font-size: 32px;
-    color: var(--green);
-    line-height: 1;
-  }
-  .stat-lbl { font-size: 10px; letter-spacing: 2px; color: var(--text-dim); margin-top: 4px; }
-  .stat-card.warn .stat-num { color: var(--amber); }
-  .stat-card.danger .stat-num { color: var(--red); }
+/* ── VIEWS ── */
+.view{display:none;}
+.view.active{display:block;}
 
-  /* ─── TOAST ─── */
-  .toast {
-    position: fixed; bottom: 32px; right: 32px;
-    background: var(--bg2);
-    border: 1px solid var(--border-lit);
-    padding: 14px 22px;
-    font-size: 12px;
-    letter-spacing: 2px;
-    color: var(--green);
-    z-index: 10000;
-    transform: translateY(80px);
-    opacity: 0;
-    transition: all 0.3s;
-    max-width: 340px;
-  }
-  .toast.show { transform: translateY(0); opacity: 1; }
-  .toast.err { border-color: var(--red-dim); color: var(--red); }
+/* ── BANNERS ── */
+.wb{background:rgba(255,51,68,.09);border:1px solid var(--red-dim);padding:9px 14px;font-size:11px;color:var(--red);letter-spacing:1px;margin-bottom:14px;}
+.sb{background:rgba(0,255,136,.06);border:1px solid var(--border-lit);padding:9px 14px;font-size:11px;color:var(--green);letter-spacing:1px;margin-bottom:14px;}
 
-  /* ─── VIEWS ─── */
-  .view { display:none; }
-  .view.active { display:block; }
+/* ── LOADING ── */
+.loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;gap:18px;}
+.lt2{font-family:'Oswald',sans-serif;letter-spacing:6px;font-size:20px;color:var(--green);animation:pulse 1s infinite;}
+.ls{font-size:11px;color:var(--text-dim);letter-spacing:3px;}
 
-  /* ─── DIVIDER ─── */
-  .divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 20px 0;
-  }
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:var(--panel);border:1px solid var(--border-lit);padding:28px;width:100%;max-width:420px;border-radius:2px;}
+.modal-title{font-family:'Oswald',sans-serif;font-size:15px;letter-spacing:4px;color:var(--green);margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.modal-actions{display:flex;gap:10px;margin-top:18px;}
 
-  /* misc */
-  .mono { font-family: 'Space Mono', monospace; }
-  .dim { color: var(--text-dim); }
-  .small { font-size: 11px; }
-  .mt8 { margin-top: 8px; }
-  .mt16 { margin-top: 16px; }
-  .gap8 { gap: 8px; }
-  .flex { display:flex; align-items:center; }
-  .redacted { background: var(--text-dim); color: var(--text-dim); user-select:none; border-radius:2px; padding:0 4px; }
-  .warning-banner {
-    background: rgba(255,51,68,0.1);
-    border: 1px solid var(--red-dim);
-    padding: 10px 16px;
-    font-size: 12px;
-    color: var(--red);
-    letter-spacing: 1px;
-    margin-bottom: 16px;
-  }
-  .success-banner {
-    background: rgba(0,255,136,0.07);
-    border: 1px solid var(--border-lit);
-    padding: 10px 16px;
-    font-size: 12px;
-    color: var(--green);
-    letter-spacing: 1px;
-    margin-bottom: 16px;
-  }
-  .admin-badge {
-    font-size:10px; letter-spacing:2px;
-    color: var(--amber); border: 1px solid var(--amber-dim);
-    padding: 2px 8px; margin-left: 12px;
-  }
+/* ── MISC ── */
+.reveal{cursor:pointer;}
+.redacted{background:var(--text-dim);color:var(--text-dim);transition:all .2s;border-radius:2px;padding:0 4px;user-select:none;}
+.reveal:hover .redacted{background:transparent;color:var(--amber);}
+.blink{animation:blink 1s step-end infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 1.5s infinite;margin-right:5px;vertical-align:middle;}
+.dim{color:var(--text-dim);}
+.small{font-size:11px;letter-spacing:1px;}
+.flex-gap{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.section-label{font-size:10px;letter-spacing:3px;color:var(--text-muted);margin-bottom:10px;margin-top:18px;}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
 
-  /* Redact hover reveal */
-  .reveal { cursor: pointer; }
-  .reveal .redacted { transition: all 0.2s; }
-  .reveal:hover .redacted { background: transparent; color: var(--amber); }
-
-  @media (max-width: 800px) {
-    .grid-2, .grid-3 { grid-template-columns: 1fr; }
-    .main { padding: 16px; }
-    .header { padding: 16px; }
-    .stat-row { flex-direction: column; }
-  }
+@media(max-width:800px){
+  .g2{grid-template-columns:1fr;}
+  .main{padding:14px;}
+  .header{padding:14px;}
+  .stat-row{flex-wrap:wrap;}
+  .sc{min-width:calc(50% - 7px);}
+}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div>
-    <div class="logo">ENIGMA<span>FIELD OPERATIONS TERMINAL</span></div>
+<div class="loading-overlay" id="loading-overlay">
+  <div class="lt2">ENIGMA</div>
+  <div class="ls">ESTABLISHING SECURE LINK...</div>
+</div>
+
+<!-- Edit Agent Modal -->
+<div class="modal-overlay" id="edit-modal" style="display:none;">
+  <div class="modal">
+    <div class="modal-title">EDIT AGENT</div>
+    <input type="hidden" id="edit-agent-id">
+    <div class="field">
+      <label>CODENAME</label>
+      <input type="text" id="edit-codename" style="text-transform:uppercase;">
+    </div>
+    <div class="field">
+      <label>PASSWORD</label>
+      <input type="text" id="edit-password">
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="saveAgentEdit()">◈ SAVE CHANGES</button>
+      <button class="btn ba" onclick="closeEditModal()">✕ CANCEL</button>
+    </div>
   </div>
+</div>
+
+<div class="header">
+  <div><div class="logo">ENIGMA<span>FIELD OPERATIONS TERMINAL</span></div></div>
   <div class="status-bar">
     <div class="status-dot"></div>
-    <div class="status-label">SECURE LINK ACTIVE</div>
+    <div class="status-label" id="db-status">CONNECTING...</div>
     <div class="clock" id="clock">--:--:--</div>
   </div>
 </div>
@@ -405,664 +203,694 @@
 
 <div class="main">
 
-  <!-- ════════ ADMIN VIEW ════════ -->
-  <div class="view active" id="view-admin">
+<!-- ════════════ ADMIN VIEW ════════════ -->
+<div class="view active" id="view-admin">
 
-    <!-- Admin Login -->
-    <div id="admin-login-screen">
-      <div style="max-width:400px; margin: 60px auto;">
-        <div class="panel">
-          <div class="panel-header">
-            <div class="panel-title">COMMAND ACCESS</div>
-            <div class="panel-badge">ADMIN</div>
-          </div>
-          <p class="dim small" style="margin-bottom:20px; letter-spacing:1px;">Enter administrator passphrase to access command panel.</p>
-          <div class="field">
-            <label>ADMIN PASSPHRASE</label>
-            <input type="password" id="admin-pass-input" placeholder="passphrase..." onkeydown="if(event.key==='Enter')adminLogin()">
-          </div>
-          <button class="btn btn-full" onclick="adminLogin()">AUTHENTICATE ›</button>
-          <p class="dim small mt8" style="letter-spacing:1px;">Default: <span style="color:var(--amber)">admin1234</span></p>
+  <!-- Login -->
+  <div id="admin-login-screen">
+    <div style="max-width:380px;margin:60px auto;">
+      <div class="panel">
+        <div class="ph"><div class="pt">COMMAND ACCESS</div><div class="pb">ADMIN</div></div>
+        <p class="dim small" style="margin-bottom:18px;">Enter administrator passphrase to access command panel.</p>
+        <div class="field"><label>ADMIN PASSPHRASE</label>
+          <input type="password" id="admin-pass-input" placeholder="passphrase..." onkeydown="if(event.key==='Enter')adminLogin()">
         </div>
+        <button class="btn bf" onclick="adminLogin()" id="admin-login-btn">AUTHENTICATE ›</button>
+        <p id="admin-login-err" style="color:var(--red);font-size:11px;margin-top:9px;display:none;letter-spacing:1px;"></p>
       </div>
     </div>
+  </div>
 
-    <!-- Admin Dashboard -->
-    <div id="admin-dashboard" style="display:none;">
+  <!-- Dashboard -->
+  <div id="admin-dashboard" style="display:none;">
 
-      <div class="stat-row">
-        <div class="stat-card">
-          <div class="stat-num" id="stat-agents">0</div>
-          <div class="stat-lbl">ACTIVE AGENTS</div>
-        </div>
-        <div class="stat-card" id="stat-card-key">
-          <div class="stat-num" id="stat-key">—</div>
-          <div class="stat-lbl">TODAY'S KEY</div>
-        </div>
-        <div class="stat-card warn" id="stat-card-warns">
-          <div class="stat-num" id="stat-warns">0</div>
-          <div class="stat-lbl">ACCESS WARNINGS</div>
-        </div>
-        <div class="stat-card danger" id="stat-card-flags">
-          <div class="stat-num" id="stat-flags">0</div>
-          <div class="stat-lbl">SECURITY FLAGS</div>
-        </div>
-      </div>
+    <div class="stat-row">
+      <div class="sc"><div class="sn" id="stat-agents">—</div><div class="sl">ACTIVE AGENTS</div></div>
+      <div class="sc"><div class="sn" id="stat-key" style="font-size:18px;padding-top:7px;">—</div><div class="sl">TODAY'S KEY</div></div>
+      <div class="sc sw"><div class="sn" id="stat-warns">0</div><div class="sl">ACCESS WARNINGS</div></div>
+      <div class="sc sd"><div class="sn" id="stat-flags">0</div><div class="sl">SECURITY FLAGS</div></div>
+    </div>
 
-      <div class="grid-2">
+    <div class="tab-row">
+      <button class="tab-btn active" id="tbtn-ops" onclick="adminTab('ops',this)">OPERATIONS</button>
+      <button class="tab-btn" id="tbtn-agents" onclick="adminTab('agents',this)">AGENTS</button>
+      <button class="tab-btn" id="tbtn-log" onclick="adminTab('log',this)"><span class="live-dot"></span>SURVEILLANCE</button>
+      <button class="tab-btn" id="tbtn-settings" onclick="adminTab('settings',this)">SETTINGS</button>
+    </div>
 
-        <!-- Left col -->
+    <!-- ── OPERATIONS ── -->
+    <div class="tab-content active" id="tab-ops">
+      <div class="g2">
         <div>
-          <!-- Agent Registration -->
+          <!-- Quick enroll -->
           <div class="panel">
-            <div class="panel-header">
-              <div class="panel-title">AGENT REGISTRATION</div>
-              <div class="panel-badge">ENROLL</div>
-            </div>
-            <div class="field">
-              <label>CODENAME</label>
+            <div class="ph"><div class="pt">ENROLL NEW AGENT</div><div class="pb">REGISTER</div></div>
+            <div class="field"><label>CODENAME</label>
               <input type="text" id="reg-codename" placeholder="e.g. PHANTOM, RAVEN..." style="text-transform:uppercase;">
             </div>
-            <div class="field">
-              <label>PASSWORD (agent's login credential)</label>
-              <input type="text" id="reg-password" placeholder="leave blank to auto-generate">
+            <div class="field"><label>PASSWORD (blank = auto-generate)</label>
+              <input type="text" id="reg-password" placeholder="auto-generate if empty">
             </div>
             <button class="btn" onclick="registerAgent()">◈ ENROLL AGENT</button>
           </div>
 
-          <!-- Daily Key -->
+          <!-- Daily key -->
           <div class="panel">
-            <div class="panel-header">
-              <div class="panel-title">DAILY KEY</div>
-              <div class="panel-badge">CIPHER</div>
+            <div class="ph"><div class="pt">DAILY KEY</div><div class="pb">CIPHER</div></div>
+            <p class="dim small" style="margin-bottom:14px;">Issue today's cipher key. Say it publicly or DM each agent — only they know it's THE key.</p>
+            <div class="field"><label>SET TODAY'S KEY</label>
+              <input type="text" id="daily-key-input" placeholder="e.g. FALCON, STORM..." style="text-transform:uppercase;letter-spacing:3px;">
             </div>
-            <p class="dim small" style="margin-bottom:16px; letter-spacing:1px;">Issue today's key to all active agents. This key drives the cipher — say it publicly or DM each agent. Only they will know it's THE key.</p>
-            <div class="field">
-              <label>SET TODAY'S KEY</label>
-              <input type="text" id="daily-key-input" placeholder="e.g. FALCON, STORM, MERIDIAN...">
-            </div>
-            <div style="display:flex; gap:12px;">
+            <div class="flex-gap">
               <button class="btn" onclick="setDailyKey()">◈ SET KEY</button>
-              <button class="btn btn-amber" onclick="generateKey()">⚡ GENERATE</button>
+              <button class="btn ba" onclick="generateKey()">⚡ GENERATE</button>
             </div>
           </div>
+        </div>
 
-          <!-- Decode Incoming -->
-          <div class="panel">
-            <div class="panel-header">
-              <div class="panel-title">DECODE INCOMING INTEL</div>
-              <div class="panel-badge">DECRYPT</div>
+        <!-- Decode -->
+        <div>
+          <div class="panel" style="height:100%;">
+            <div class="ph"><div class="pt">DECODE INCOMING INTEL</div><div class="pb">DECRYPT</div></div>
+            <p class="dim small" style="margin-bottom:14px;">Paste scrambled message from any agent. Today's key auto-fills.</p>
+            <div class="field"><label>ENCRYPTED MESSAGE</label>
+              <textarea id="decode-input" placeholder="Paste scrambled text here..." style="min-height:130px;"></textarea>
             </div>
-            <p class="dim small" style="margin-bottom:16px; letter-spacing:1px;">Paste scrambled message received from agent. Key auto-fills from today's session.</p>
-            <div class="field">
-              <label>ENCRYPTED MESSAGE</label>
-              <textarea id="decode-input" placeholder="Paste scrambled text here..."></textarea>
-            </div>
-            <div class="field">
-              <label>DECODE KEY (auto-filled)</label>
-              <input type="text" id="decode-key" placeholder="key...">
+            <div class="field"><label>DECODE KEY (auto-filled)</label>
+              <input type="text" id="decode-key" placeholder="key..." style="text-transform:uppercase;letter-spacing:3px;">
             </div>
             <button class="btn" onclick="decodeMessage()">◈ DECRYPT MESSAGE</button>
-            <div id="decode-output" style="display:none; margin-top:16px;">
+            <div id="decode-output" style="display:none;margin-top:14px;">
               <div class="decode-meta" id="decode-meta"></div>
               <div class="decode-result" id="decode-result"></div>
             </div>
           </div>
         </div>
+      </div>
+    </div>
 
-        <!-- Right col -->
-        <div>
-          <!-- Agent Roster -->
-          <div class="panel">
-            <div class="panel-header">
-              <div class="panel-title">AGENT ROSTER</div>
-              <div class="panel-badge">CLASSIFIED</div>
-            </div>
-            <div id="agent-roster-empty" class="dim small" style="letter-spacing:1px;">No agents enrolled. Register above.</div>
-            <table class="agent-table" id="agent-roster-table" style="display:none;">
-              <thead>
-                <tr>
-                  <th>CODENAME</th>
-                  <th>PASSWORD</th>
-                  <th>STATUS</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="agent-roster-body"></tbody>
-            </table>
-          </div>
+    <!-- ── AGENTS ── -->
+    <div class="tab-content" id="tab-agents">
+      <div class="panel">
+        <div class="ph">
+          <div class="pt">AGENT ROSTER</div>
+          <div class="pb">FULL CONTROL</div>
+          <button class="btn bs" style="margin-left:auto;" onclick="adminTab('ops',document.getElementById('tbtn-ops'))">+ ENROLL NEW</button>
+        </div>
+        <div id="roster-loading" class="dim small">Loading agents...</div>
+        <div id="roster-empty" class="dim small" style="display:none;">No agents enrolled yet. Use the Operations tab to enroll.</div>
+        <table class="agent-table" id="agent-table" style="display:none;">
+          <thead><tr>
+            <th>CODENAME</th>
+            <th>PASSWORD</th>
+            <th>ENROLLED</th>
+            <th>TODAY'S STATUS</th>
+            <th style="text-align:right;">ACTIONS</th>
+          </tr></thead>
+          <tbody id="agent-tbody"></tbody>
+        </table>
+      </div>
+    </div>
 
-          <!-- Access Log -->
-          <div class="panel">
-            <div class="panel-header">
-              <div class="panel-title">ACCESS SURVEILLANCE</div>
-              <div class="panel-badge">AUDIT</div>
-            </div>
-            <div id="access-log-empty" class="dim small" style="letter-spacing:1px;">No access events recorded today.</div>
-            <ul class="log-list" id="access-log-list"></ul>
-          </div>
+    <!-- ── SURVEILLANCE ── -->
+    <div class="tab-content" id="tab-log">
+      <div class="panel">
+        <div class="ph">
+          <div class="pt"><span class="live-dot"></span>LIVE SURVEILLANCE</div>
+          <div class="pb">REAL-TIME</div>
         </div>
 
-      </div><!-- /grid-2 -->
-    </div><!-- /admin-dashboard -->
-  </div><!-- /view-admin -->
+        <!-- Filter row -->
+        <div class="flex-gap" style="margin-bottom:14px;">
+          <button class="btn bs" onclick="filterLog('all')" id="flt-all">ALL</button>
+          <button class="btn bs ba" onclick="filterLog('warn')" id="flt-warn">WARNINGS</button>
+          <button class="btn bs br" onclick="filterLog('flag')" id="flt-flag">FLAGS</button>
+          <button class="btn bs" onclick="filterLog('today')" id="flt-today">TODAY</button>
+        </div>
 
+        <hr class="divider">
 
-  <!-- ════════ AGENT PORTAL VIEW ════════ -->
-  <div class="view" id="view-agent">
+        <!-- Clear controls -->
+        <div class="section-label">CLEAR LOG ENTRIES</div>
+        <div class="flex-gap" style="margin-bottom:18px;">
+          <button class="btn bs ba" onclick="clearTodayLogs()">⚡ CLEAR TODAY'S LOGS</button>
+          <button class="btn bs br" onclick="clearLoginLogs()">✕ CLEAR ALL LOGINS</button>
+          <button class="btn bs br" onclick="clearAllLogs()">⛔ WIPE FULL AUDIT</button>
+          <button class="btn bs" onclick="clearOldLogs()">✦ PURGE OLD (pre-today)</button>
+        </div>
 
-    <!-- Agent Login -->
-    <div id="agent-login-screen">
-      <div class="agent-login-wrap" style="margin: 60px auto;">
-        <div class="terminal-header">&gt; ENIGMA FIELD RELAY v2.4 <span class="blink">_</span></div>
+        <hr class="divider">
+
+        <div id="log-loading" class="dim small">Loading access log...</div>
+        <div id="log-empty" class="dim small" style="display:none;">No entries match this filter.</div>
+        <ul class="log-list" id="access-log-list"></ul>
+      </div>
+    </div>
+
+    <!-- ── SETTINGS ── -->
+    <div class="tab-content" id="tab-settings">
+      <div class="g2">
         <div class="panel">
-          <div class="panel-header">
-            <div class="panel-title">AGENT AUTHENTICATION</div>
-          </div>
-          <p class="dim small" style="margin-bottom:20px; letter-spacing:1px;">Enter your assigned password and today's key provided by command.</p>
-          <div class="field">
-            <label>AGENT PASSWORD</label>
-            <input type="password" id="agent-pass-input" placeholder="your unique password..." onkeydown="if(event.key==='Enter')agentLogin()">
-          </div>
-          <div class="field">
-            <label>TODAY'S KEY</label>
-            <input type="text" id="agent-key-input" placeholder="key issued by command..." style="letter-spacing:3px; text-transform:uppercase;" onkeydown="if(event.key==='Enter')agentLogin()">
-          </div>
-          <button class="btn btn-full" onclick="agentLogin()">◈ ACCESS RELAY ›</button>
-          <p id="agent-login-error" style="color:var(--red); font-size:11px; margin-top:10px; display:none; letter-spacing:1px;"></p>
+          <div class="ph"><div class="pt">ADMIN CREDENTIALS</div><div class="pb">SECURITY</div></div>
+          <p class="dim small" style="margin-bottom:14px;">Change the admin passphrase used to access this panel.</p>
+          <div class="field"><label>CURRENT PASSPHRASE</label><input type="password" id="s-cur" placeholder="current..."></div>
+          <div class="field"><label>NEW PASSPHRASE</label><input type="password" id="s-new" placeholder="new (6+ chars)..."></div>
+          <div class="field"><label>CONFIRM NEW</label><input type="password" id="s-conf" placeholder="confirm..."></div>
+          <button class="btn" onclick="changeAdminPass()">◈ UPDATE PASSPHRASE</button>
+        </div>
+
+        <div class="panel">
+          <div class="ph"><div class="pt">SECURITY THRESHOLDS</div><div class="pb">CONFIG</div></div>
+          <p class="dim small" style="margin-bottom:14px;">How many logins per day before a warning or flag is raised.</p>
+          <div class="field"><label>WARN AFTER N LOGINS/DAY</label><input type="number" id="s-warn" min="1" max="10" value="2"></div>
+          <div class="field"><label>FLAG AFTER N LOGINS/DAY</label><input type="number" id="s-flag" min="2" max="20" value="3"></div>
+          <button class="btn" onclick="saveThresholds()">◈ SAVE</button>
+        </div>
+
+        <div class="panel">
+          <div class="ph"><div class="pt">SESSION</div><div class="pb">ADMIN</div></div>
+          <p class="dim small" style="margin-bottom:14px;">Lock the admin panel and return to the login screen.</p>
+          <button class="btn ba" onclick="adminLogout()">✕ LOCK PANEL</button>
         </div>
       </div>
     </div>
 
-    <!-- Agent Dashboard -->
-    <div id="agent-dashboard" style="display:none;">
-      <div class="agent-login-wrap" style="margin: 30px auto;">
-        <div class="success-banner" id="agent-welcome"></div>
-        <div id="agent-warning-banner" style="display:none;" class="warning-banner"></div>
+  </div><!-- /admin-dashboard -->
+</div><!-- /view-admin -->
 
-        <div class="panel">
-          <div class="panel-header">
-            <div class="panel-title">SECURE RELAY</div>
-            <div class="panel-badge">ENCRYPT</div>
-          </div>
-          <p class="dim small" style="margin-bottom:16px; letter-spacing:1px;">Type your intel below. Your codename will be prepended automatically. Hit encrypt — then relay the output via /msg, DM, book, or any channel.</p>
-          <div class="field">
-            <label>INTEL / MESSAGE</label>
-            <textarea id="agent-message-input" placeholder="Type your intel here...&#10;E.g: Enemy patrol at sector 7 every 2 hours..."></textarea>
-          </div>
-          <button class="btn btn-full" onclick="encryptAgentMessage()">◈ ENCRYPT & PREPARE RELAY</button>
+
+<!-- ════════════ AGENT PORTAL ════════════ -->
+<div class="view" id="view-agent">
+
+  <div id="agent-login-screen">
+    <div style="max-width:420px;margin:55px auto;">
+      <div class="dim small" style="margin-bottom:8px;letter-spacing:2px;">&gt; ENIGMA FIELD RELAY v2.4 <span class="blink">_</span></div>
+      <div class="panel">
+        <div class="ph"><div class="pt">AGENT AUTHENTICATION</div></div>
+        <p class="dim small" style="margin-bottom:18px;">Enter your assigned password and today's key provided by command.</p>
+        <div class="field"><label>AGENT PASSWORD</label>
+          <input type="password" id="agent-pass-input" placeholder="your unique password..." onkeydown="if(event.key==='Enter')agentLogin()">
         </div>
+        <div class="field"><label>TODAY'S KEY</label>
+          <input type="text" id="agent-key-input" placeholder="key issued by command..." style="letter-spacing:3px;text-transform:uppercase;" onkeydown="if(event.key==='Enter')agentLogin()">
+        </div>
+        <button class="btn bf" id="agent-login-btn" onclick="agentLogin()">◈ ACCESS RELAY ›</button>
+        <p id="agent-login-error" style="color:var(--red);font-size:11px;margin-top:9px;display:none;letter-spacing:1px;"></p>
+      </div>
+    </div>
+  </div>
 
-        <div id="agent-encrypted-output" style="display:none;">
-          <div class="panel">
-            <div class="panel-header">
-              <div class="panel-title">ENCRYPTED RELAY</div>
-              <div class="panel-badge">READY TO TRANSMIT</div>
-            </div>
-            <p class="dim small" style="margin-bottom:12px; letter-spacing:1px;">Copy this and send it to command via any channel. To anyone else it looks like garbage.</p>
-            <div class="cipher-display" id="encrypted-text"></div>
-            <div style="display:flex; gap:12px; margin-top:16px;">
-              <button class="btn" onclick="copyEncrypted()">◈ COPY TO CLIPBOARD</button>
-              <button class="btn btn-amber" onclick="clearAgentSession()">✕ CLEAR SESSION</button>
-            </div>
+  <div id="agent-dashboard" style="display:none;">
+    <div style="max-width:480px;margin:28px auto;">
+      <div class="sb" id="agent-welcome"></div>
+      <div id="agent-warning-banner" class="wb" style="display:none;"></div>
+      <div class="panel">
+        <div class="ph"><div class="pt">SECURE RELAY</div><div class="pb">ENCRYPT</div></div>
+        <p class="dim small" style="margin-bottom:14px;">Type your intel. Your codename is prepended automatically. Encrypt — then relay the output via any channel.</p>
+        <div class="field"><label>INTEL / MESSAGE</label>
+          <textarea id="agent-message-input" placeholder="Type your intel here...&#10;E.g: Enemy patrol at sector 7, moving south every 2 hrs."></textarea>
+        </div>
+        <button class="btn bf" onclick="encryptAgentMessage()">◈ ENCRYPT & PREPARE RELAY</button>
+      </div>
+      <div id="agent-encrypted-output" style="display:none;">
+        <div class="panel">
+          <div class="ph"><div class="pt">ENCRYPTED RELAY</div><div class="pb">TRANSMIT</div></div>
+          <p class="dim small" style="margin-bottom:10px;">Copy and send to command via any channel. To anyone else it looks like noise.</p>
+          <div class="cipher-display" id="encrypted-text"></div>
+          <div class="flex-gap" style="margin-top:14px;">
+            <button class="btn" onclick="copyEncrypted()">◈ COPY</button>
+            <button class="btn ba" onclick="clearAgentSession()">✕ CLEAR SESSION</button>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-  </div><!-- /view-agent -->
-
+</div><!-- /view-agent -->
 </div><!-- /main -->
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════
+//  SUPABASE
+// ══════════════════════════════════════════════
+const SUPA_URL='https://nzqqbigzuxdqyjszpnpy.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56cXFiaWd6dXhkcXlqc3pwbnB5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1OTIwNjYsImV4cCI6MjA5NDE2ODA2Nn0.87RRIFXvn34Au_denSm5W_XvIaxcwr6gMmSYXC_BOGc';
+const db=supabase.createClient(SUPA_URL,SUPA_KEY);
+
+// ══════════════════════════════════════════════
 //  STATE
-// ══════════════════════════════════════════════════════
-let state = JSON.parse(localStorage.getItem('enigma_state') || 'null') || {
-  agents: [],       // {codename, password, id}
-  dailyKey: '',
-  accessLog: [],    // {agentId, codename, time, date, action, flagged}
-  adminPass: 'admin1234'
-};
+// ══════════════════════════════════════════════
+let adminAuthed=false, currentAgent=null;
+let cfg={admin_password:'admin1234',warn_threshold:2,flag_threshold:3};
+let allLogs=[], logFilter='all', realtimeSub=null;
 
-// Session (not persisted)
-let currentAgent = null;
-let adminAuthed = false;
-
-function save() {
-  localStorage.setItem('enigma_state', JSON.stringify(state));
-}
-
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 //  CLOCK
-// ══════════════════════════════════════════════════════
-function updateClock() {
-  const now = new Date();
-  document.getElementById('clock').textContent =
-    now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-}
-setInterval(updateClock, 1000);
-updateClock();
+// ══════════════════════════════════════════════
+setInterval(()=>{
+  document.getElementById('clock').textContent=
+    new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+},1000);
 
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+async function init(){
+  try{
+    const{data,error}=await db.from('admin_settings').select('*').eq('id',1).single();
+    if(error)throw error;
+    if(data){cfg=data;document.getElementById('s-warn').value=cfg.warn_threshold;document.getElementById('s-flag').value=cfg.flag_threshold;}
+    document.getElementById('db-status').textContent='SECURE LINK ACTIVE';
+  }catch(e){
+    document.getElementById('db-status').textContent='DB ERROR';
+    toast('Database connection failed — check Supabase RLS/API settings','terr');
+  }
+  document.getElementById('loading-overlay').style.display='none';
+}
+window.addEventListener('load',init);
+
+// ══════════════════════════════════════════════
 //  NAVIGATION
-// ══════════════════════════════════════════════════════
-function showView(v) {
-  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById('view-' + v).classList.add('active');
-  document.getElementById('nav-' + v).classList.add('active');
+// ══════════════════════════════════════════════
+function showView(v){
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.getElementById('nav-'+v).classList.add('active');
+}
+function adminTab(name,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(name==='agents')loadRoster();
+  if(name==='log')loadAccessLog();
 }
 
-// ══════════════════════════════════════════════════════
-//  CIPHER — Vigenère
-// ══════════════════════════════════════════════════════
-function vigenere(text, key, encrypt) {
-  if (!key || key.length === 0) return text;
-  const K = key.toUpperCase().replace(/[^A-Z]/g, '');
-  if (K.length === 0) return text;
-  let result = '';
-  let ki = 0;
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
-    const code = c.charCodeAt(0);
-    if (code >= 65 && code <= 90) { // uppercase
-      const shift = K.charCodeAt(ki % K.length) - 65;
-      result += encrypt
-        ? String.fromCharCode((code - 65 + shift) % 26 + 65)
-        : String.fromCharCode((code - 65 - shift + 26) % 26 + 65);
-      ki++;
-    } else if (code >= 97 && code <= 122) { // lowercase
-      const shift = K.charCodeAt(ki % K.length) - 65;
-      result += encrypt
-        ? String.fromCharCode((code - 97 + shift) % 26 + 97)
-        : String.fromCharCode((code - 97 - shift + 26) % 26 + 97);
-      ki++;
-    } else {
-      // scramble non-alpha with key-based noise
-      const shift = K.charCodeAt(ki % K.length);
-      if (encrypt) {
-        result += String.fromCharCode(((code + shift) % 94) + 33);
-      } else {
-        result += String.fromCharCode(((code - 33 - shift % 94) % 94 + 94) % 94 + 33);
-      }
-      ki++;
-    }
+// ══════════════════════════════════════════════
+//  CIPHER
+// ══════════════════════════════════════════════
+function vigenere(text,key,enc){
+  const K=key.toUpperCase().replace(/[^A-Z]/g,'');
+  if(!K.length)return text;
+  let res='',ki=0;
+  for(let i=0;i<text.length;i++){
+    const c=text[i],code=c.charCodeAt(0),shift=K.charCodeAt(ki%K.length)-65;
+    if(code>=65&&code<=90){res+=String.fromCharCode((enc?(code-65+shift)%26:(code-65-shift+26)%26)+65);ki++;}
+    else if(code>=97&&code<=122){res+=String.fromCharCode((enc?(code-97+shift)%26:(code-97-shift+26)%26)+97);ki++;}
+    else{res+=enc?String.fromCharCode(((code+shift)%94)+33):String.fromCharCode(((code-33-shift%94)%94+94)%94+33);ki++;}
   }
-  return result;
+  return res;
 }
-
-// Add extra scramble layer for more chaos on encrypt
-function scrambleNoise(text, key) {
-  // XOR-style shift on even indices using key length
-  const K = key.toUpperCase().replace(/[^A-Z]/g, '') || 'A';
-  return text.split('').map((c, i) => {
-    const code = c.charCodeAt(0);
-    if (code >= 33 && code <= 126) {
-      const s = K.charCodeAt((i * 3) % K.length) % 10;
-      return String.fromCharCode(((code - 33 + s) % 94) + 33);
-    }
+function noise(text,key,enc){
+  const K=key.toUpperCase().replace(/[^A-Z]/g,'')||'A';
+  return text.split('').map((c,i)=>{
+    const code=c.charCodeAt(0);
+    if(code>=33&&code<=126){const s=K.charCodeAt((i*3)%K.length)%10;return String.fromCharCode(enc?((code-33+s)%94)+33:((code-33-s+94)%94)+33);}
     return c;
   }).join('');
 }
+const encrypt=(t,k)=>noise(vigenere(t,k,true),k,true);
+const decrypt=(t,k)=>vigenere(noise(t,k,false),k,false);
 
-function unscrambleNoise(text, key) {
-  const K = key.toUpperCase().replace(/[^A-Z]/g, '') || 'A';
-  return text.split('').map((c, i) => {
-    const code = c.charCodeAt(0);
-    if (code >= 33 && code <= 126) {
-      const s = K.charCodeAt((i * 3) % K.length) % 10;
-      return String.fromCharCode(((code - 33 - s + 94) % 94) + 33);
-    }
-    return c;
-  }).join('');
-}
-
-function encrypt(plaintext, key) {
-  const v = vigenere(plaintext, key, true);
-  return scrambleNoise(v, key);
-}
-
-function decrypt(ciphertext, key) {
-  const u = unscrambleNoise(ciphertext, key);
-  return vigenere(u, key, false);
-}
-
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 //  UTILS
-// ══════════════════════════════════════════════════════
-function genPassword() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  return Array.from({length: 8}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+// ══════════════════════════════════════════════
+function genPassword(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return Array.from({length:8},()=>c[Math.floor(Math.random()*c.length)]).join('');}
+const KEYS=['FALCON','STORM','EMBER','RAVEN','VORTEX','CIPHER','DAGGER','ECLIPSE','FROST','HERALD','IRON','JADE','KNIGHT','LUNAR','NOVA','ONYX','PILGRIM','QUARTZ','RADIX','SPHINX','TUNDRA','UMBRA','VECTOR','WRAITH','XENON','ZEPHYR','COBALT','DELTA','ECHO','GAMMA','HYDRA','INDIGO'];
+const genKey=()=>KEYS[Math.floor(Math.random()*KEYS.length)];
+const todayStr=()=>new Date().toISOString().split('T')[0];
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function toast(msg,cls=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show'+(cls?' '+cls:'');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),4000);
 }
+function setBtn(id,dis,txt){const b=document.getElementById(id);if(!b)return;b.disabled=dis;if(txt)b.textContent=txt;}
 
-function genKey() {
-  const words = ['FALCON','STORM','EMBER','RAVEN','VORTEX','CIPHER','DAGGER','ECLIPSE',
-    'FROST','HERALD','IRON','JADE','KNIGHT','LUNAR','NOVA','ONYX','PILGRIM',
-    'QUARTZ','RADIX','SPHINX','TUNDRA','UMBRA','VECTOR','WRAITH','XENON','ZEPHYR'];
-  return words[Math.floor(Math.random() * words.length)];
-}
-
-function todayStr() {
-  return new Date().toISOString().split('T')[0];
-}
-
-function nowStr() {
-  return new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-}
-
-function toast(msg, err=false) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show' + (err ? ' err' : '');
-  clearTimeout(t._t);
-  t._t = setTimeout(() => t.classList.remove('show'), 3500);
-}
-
-// ══════════════════════════════════════════════════════
-//  ADMIN
-// ══════════════════════════════════════════════════════
-function adminLogin() {
-  const inp = document.getElementById('admin-pass-input').value;
-  if (inp === state.adminPass) {
-    adminAuthed = true;
-    document.getElementById('admin-login-screen').style.display = 'none';
-    document.getElementById('admin-dashboard').style.display = 'block';
-    refreshAdminUI();
-    toast('COMMAND ACCESS GRANTED');
-  } else {
-    toast('AUTHENTICATION FAILED', true);
-    document.getElementById('admin-pass-input').value = '';
-    // Log suspicious admin access attempt
-    logAccess('UNKNOWN', 'ADMIN_FAIL', true);
+// ══════════════════════════════════════════════
+//  ADMIN AUTH
+// ══════════════════════════════════════════════
+async function adminLogin(){
+  const pass=document.getElementById('admin-pass-input').value;
+  const errEl=document.getElementById('admin-login-err');
+  setBtn('admin-login-btn',true,'AUTHENTICATING...');
+  const{data}=await db.from('admin_settings').select('*').eq('id',1).single();
+  if(data)cfg=data;
+  setBtn('admin-login-btn',false,'AUTHENTICATE ›');
+  if(pass!==cfg.admin_password){
+    errEl.style.display='block';errEl.textContent='AUTHENTICATION FAILED — INVALID PASSPHRASE';
+    await logAccess('UNKNOWN','ADMIN_FAIL','flag',null);return;
   }
+  adminAuthed=true;errEl.style.display='none';
+  document.getElementById('admin-login-screen').style.display='none';
+  document.getElementById('admin-dashboard').style.display='block';
+  document.getElementById('s-warn').value=cfg.warn_threshold;
+  document.getElementById('s-flag').value=cfg.flag_threshold;
+  toast('COMMAND ACCESS GRANTED');
+  await refreshStats();
+  startRealtime();
+}
+function adminLogout(){
+  adminAuthed=false;
+  if(realtimeSub){db.removeChannel(realtimeSub);realtimeSub=null;}
+  document.getElementById('admin-dashboard').style.display='none';
+  document.getElementById('admin-login-screen').style.display='block';
+  document.getElementById('admin-pass-input').value='';
+  toast('PANEL LOCKED');
 }
 
-function refreshAdminUI() {
-  const agents = state.agents;
-  document.getElementById('stat-agents').textContent = agents.length;
-  document.getElementById('stat-key').textContent = state.dailyKey || '—';
-  document.getElementById('decode-key').value = state.dailyKey || '';
-
-  // Compute warnings/flags from today's log
-  const today = todayStr();
-  const todayLog = state.accessLog.filter(l => l.date === today);
-  const warns = todayLog.filter(l => l.flagged === 'warn').length;
-  const flags = todayLog.filter(l => l.flagged === 'flag').length;
-  document.getElementById('stat-warns').textContent = warns;
-  document.getElementById('stat-flags').textContent = flags;
-
-  // Render roster
-  const tbody = document.getElementById('agent-roster-body');
-  tbody.innerHTML = '';
-  if (agents.length === 0) {
-    document.getElementById('agent-roster-empty').style.display = 'block';
-    document.getElementById('agent-roster-table').style.display = 'none';
-  } else {
-    document.getElementById('agent-roster-empty').style.display = 'none';
-    document.getElementById('agent-roster-table').style.display = 'table';
-    agents.forEach(ag => {
-      const agLog = todayLog.filter(l => l.agentId === ag.id);
-      const accessCount = agLog.filter(l => l.action === 'LOGIN').length;
-      let statusHTML = `<span class="access-ok">NO ACCESS TODAY</span>`;
-      if (accessCount === 1) statusHTML = `<span class="access-ok">✓ 1 LOGIN — CLEAN</span>`;
-      if (accessCount === 2) statusHTML = `<span class="access-warn">⚠ ${accessCount} LOGINS</span>`;
-      if (accessCount >= 3) statusHTML = `<span class="access-danger">⛔ ${accessCount} LOGINS — FLAG</span>`;
-
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><span class="codename">${ag.codename}</span></td>
-        <td class="reveal"><span class="redacted" title="hover to reveal">${ag.password}</span></td>
-        <td>${statusHTML}</td>
-        <td><button class="btn btn-sm btn-red" onclick="removeAgent('${ag.id}')">✕</button></td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  // Render access log
-  const logList = document.getElementById('access-log-list');
-  logList.innerHTML = '';
-  const allLog = state.accessLog.filter(l => l.date === today).reverse();
-  if (allLog.length === 0) {
-    document.getElementById('access-log-empty').style.display = 'block';
-  } else {
-    document.getElementById('access-log-empty').style.display = 'none';
-    allLog.forEach(entry => {
-      const li = document.createElement('li');
-      li.className = 'log-entry';
-      const flagHTML = entry.flagged === 'flag'
-        ? '<span class="log-flag">⛔ SECURITY FLAG</span>'
-        : entry.flagged === 'warn'
-        ? '<span class="access-warn">⚠ WARNING</span>'
-        : '';
-      li.innerHTML = `
-        <span class="log-time">${entry.time}</span>
-        <span class="log-agent">${entry.codename}</span>
-        <span class="log-msg">${entry.action}</span>
-        ${flagHTML}
-      `;
-      logList.appendChild(li);
-    });
-  }
+// ══════════════════════════════════════════════
+//  STATS
+// ══════════════════════════════════════════════
+async function refreshStats(){
+  const{count:ac}=await db.from('agents').select('*',{count:'exact',head:true});
+  document.getElementById('stat-agents').textContent=ac??0;
+  const{data:kd}=await db.from('daily_keys').select('key').eq('date',todayStr()).maybeSingle();
+  const k=kd?.key||'—';
+  document.getElementById('stat-key').textContent=k;
+  document.getElementById('decode-key').value=k!=='—'?k:'';
+  const{data:logs}=await db.from('access_log').select('flagged').gte('logged_at',todayStr());
+  document.getElementById('stat-warns').textContent=(logs||[]).filter(l=>l.flagged==='warn').length;
+  document.getElementById('stat-flags').textContent=(logs||[]).filter(l=>l.flagged==='flag').length;
 }
 
-function registerAgent() {
-  let codename = document.getElementById('reg-codename').value.trim().toUpperCase();
-  let password = document.getElementById('reg-password').value.trim() || genPassword();
-
-  if (!codename) { toast('Enter a codename', true); return; }
-  if (state.agents.find(a => a.codename === codename)) { toast('Codename already in use', true); return; }
-
-  const agent = { codename, password, id: Date.now().toString() };
-  state.agents.push(agent);
-  save();
-  document.getElementById('reg-codename').value = '';
-  document.getElementById('reg-password').value = '';
+// ══════════════════════════════════════════════
+//  AGENT REGISTRATION
+// ══════════════════════════════════════════════
+async function registerAgent(){
+  const codename=document.getElementById('reg-codename').value.trim().toUpperCase();
+  const password=document.getElementById('reg-password').value.trim()||genPassword();
+  if(!codename){toast('Enter a codename','terr');return;}
+  const{error}=await db.from('agents').insert({codename,password});
+  if(error){toast(error.code==='23505'?'Codename already in use':error.message,'terr');return;}
+  document.getElementById('reg-codename').value='';
+  document.getElementById('reg-password').value='';
   toast(`AGENT ${codename} ENROLLED // PWD: ${password}`);
-  refreshAdminUI();
+  await refreshStats();
+  if(document.getElementById('tab-agents').classList.contains('active'))loadRoster();
 }
 
-function removeAgent(id) {
-  state.agents = state.agents.filter(a => a.id !== id);
-  save();
-  refreshAdminUI();
-  toast('AGENT REMOVED FROM ROSTER');
+// ══════════════════════════════════════════════
+//  ROSTER + EDIT/REMOVE
+// ══════════════════════════════════════════════
+async function loadRoster(){
+  document.getElementById('roster-loading').style.display='block';
+  document.getElementById('agent-table').style.display='none';
+  document.getElementById('roster-empty').style.display='none';
+  const{data:agents}=await db.from('agents').select('*').order('created_at');
+  const{data:logs}=await db.from('access_log').select('agent_id,flagged,action').gte('logged_at',todayStr());
+  document.getElementById('roster-loading').style.display='none';
+  if(!agents||!agents.length){document.getElementById('roster-empty').style.display='block';return;}
+  document.getElementById('agent-table').style.display='table';
+  const tbody=document.getElementById('agent-tbody');
+  tbody.innerHTML='';
+  agents.forEach(ag=>{
+    const agLogs=(logs||[]).filter(l=>l.agent_id===ag.id);
+    const lc=agLogs.filter(l=>l.action==='LOGIN').length;
+    let st='<span class="aok">NO ACCESS TODAY</span>';
+    if(lc===1)st='<span class="aok">✓ 1 LOGIN</span>';
+    else if(lc===2)st='<span class="awk">⚠ 2 LOGINS</span>';
+    else if(lc>=3)st=`<span class="afg">⛔ ${lc} LOGINS</span>`;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><span class="cn">${esc(ag.codename)}</span></td>
+      <td class="reveal"><span class="redacted">${esc(ag.password)}</span></td>
+      <td style="font-size:11px;color:var(--text-dim);">${new Date(ag.created_at).toLocaleDateString('en-GB')}</td>
+      <td>${st}</td>
+      <td style="text-align:right;">
+        <div class="flex-gap" style="justify-content:flex-end;">
+          <button class="btn bs ba" onclick="openEditModal('${ag.id}','${esc(ag.codename)}','${esc(ag.password)}')">✎ EDIT</button>
+          <button class="btn bs br" onclick="removeAgent('${ag.id}','${esc(ag.codename)}')">✕ REMOVE</button>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
 }
 
-function setDailyKey() {
-  const k = document.getElementById('daily-key-input').value.trim().toUpperCase();
-  if (!k) { toast('Enter a key', true); return; }
-  state.dailyKey = k;
-  document.getElementById('daily-key-input').value = k;
-  save();
-  refreshAdminUI();
+function openEditModal(id,codename,password){
+  document.getElementById('edit-agent-id').value=id;
+  document.getElementById('edit-codename').value=codename;
+  document.getElementById('edit-password').value=password;
+  document.getElementById('edit-modal').style.display='flex';
+}
+function closeEditModal(){
+  document.getElementById('edit-modal').style.display='none';
+}
+
+async function saveAgentEdit(){
+  const id=document.getElementById('edit-agent-id').value;
+  const codename=document.getElementById('edit-codename').value.trim().toUpperCase();
+  const password=document.getElementById('edit-password').value.trim();
+  if(!codename){toast('Codename cannot be empty','terr');return;}
+  if(!password){toast('Password cannot be empty','terr');return;}
+  const{error}=await db.from('agents').update({codename,password}).eq('id',id);
+  if(error){toast(error.code==='23505'?'Codename already in use by another agent':error.message,'terr');return;}
+  closeEditModal();
+  toast(`AGENT UPDATED — ${codename}`);
+  await refreshStats();
+  loadRoster();
+}
+
+async function removeAgent(id,codename){
+  if(!confirm(`Remove agent ${codename}? This cannot be undone.`))return;
+  await db.from('agents').delete().eq('id',id);
+  toast(`AGENT ${codename} REMOVED FROM ROSTER`);
+  await refreshStats();
+  loadRoster();
+}
+
+// ══════════════════════════════════════════════
+//  DAILY KEY
+// ══════════════════════════════════════════════
+async function setDailyKey(){
+  const k=document.getElementById('daily-key-input').value.trim().toUpperCase();
+  if(!k){toast('Enter a key','terr');return;}
+  const{error}=await db.from('daily_keys').upsert({key:k,date:todayStr()},{onConflict:'date'});
+  if(error){toast(error.message,'terr');return;}
   toast(`DAILY KEY SET: ${k}`);
+  await refreshStats();
+}
+async function generateKey(){
+  const k=genKey();
+  document.getElementById('daily-key-input').value=k;
+  const{error}=await db.from('daily_keys').upsert({key:k,date:todayStr()},{onConflict:'date'});
+  if(error){toast(error.message,'terr');return;}
+  toast(`KEY GENERATED & SET: ${k}`);
+  await refreshStats();
 }
 
-function generateKey() {
-  const k = genKey();
-  document.getElementById('daily-key-input').value = k;
-  state.dailyKey = k;
-  save();
-  refreshAdminUI();
-  toast(`KEY GENERATED: ${k}`);
-}
-
-function decodeMessage() {
-  const raw = document.getElementById('decode-input').value.trim();
-  const key = document.getElementById('decode-key').value.trim().toUpperCase();
-  if (!raw) { toast('No message to decode', true); return; }
-  if (!key) { toast('No key — set daily key first', true); return; }
-
-  const plain = decrypt(raw, key);
-  document.getElementById('decode-output').style.display = 'block';
-
-  // Try to extract codename prefix
-  const codenameMatch = plain.match(/^\[([A-Z]+)\]/);
-  const agentName = codenameMatch ? codenameMatch[1] : 'UNKNOWN';
-  const msg = codenameMatch ? plain.substring(codenameMatch[0].length).trim() : plain;
-
-  document.getElementById('decode-meta').textContent = `SOURCE: ${agentName} // KEY: ${key} // DECRYPTED`;
-  document.getElementById('decode-result').innerHTML =
-    `<span style="color:var(--amber)">[${agentName}]</span> ${escapeHTML(msg)}`;
+// ══════════════════════════════════════════════
+//  DECODE
+// ══════════════════════════════════════════════
+function decodeMessage(){
+  const raw=document.getElementById('decode-input').value.trim();
+  const key=document.getElementById('decode-key').value.trim().toUpperCase();
+  if(!raw){toast('No message to decode','terr');return;}
+  if(!key){toast("No key — set today's key first",'terr');return;}
+  const plain=decrypt(raw,key);
+  const m=plain.match(/^\[([A-Z0-9_]+)\]/);
+  const agentName=m?m[1]:'UNKNOWN';
+  const msg=m?plain.substring(m[0].length).trim():plain;
+  document.getElementById('decode-output').style.display='block';
+  document.getElementById('decode-meta').textContent=`SOURCE: ${agentName} // KEY: ${key} // ${new Date().toLocaleTimeString()}`;
+  document.getElementById('decode-result').innerHTML=`<span style="color:var(--amber)">[${esc(agentName)}]</span> ${esc(msg)}`;
   toast('MESSAGE DECRYPTED');
 }
 
-// ══════════════════════════════════════════════════════
-//  ACCESS LOGGING
-// ══════════════════════════════════════════════════════
-function logAccess(codename, action, isSuspicious, agentId) {
-  const today = todayStr();
-  const time = nowStr();
-
-  // Check how many logins this agent has today
-  const todayLogins = state.accessLog.filter(
-    l => l.agentId === agentId && l.date === today && l.action === 'LOGIN'
-  ).length;
-
-  let flagged = '';
-  if (action === 'LOGIN') {
-    if (todayLogins === 1) flagged = 'warn'; // 2nd login = warn
-    if (todayLogins >= 2) flagged = 'flag';  // 3rd+ = security flag
-  }
-  if (isSuspicious) flagged = 'flag';
-
-  state.accessLog.push({ agentId: agentId || 'SYS', codename, action, time, date: today, flagged });
-  if (state.accessLog.length > 500) state.accessLog = state.accessLog.slice(-500);
-  save();
+// ══════════════════════════════════════════════
+//  ACCESS LOG
+// ══════════════════════════════════════════════
+async function logAccess(codename,action,flagged,agentId){
+  await db.from('access_log').insert({agent_id:agentId||null,codename,action,flagged:flagged||''});
 }
 
-// ══════════════════════════════════════════════════════
+async function loadAccessLog(){
+  document.getElementById('log-loading').style.display='block';
+  document.getElementById('access-log-list').innerHTML='';
+  document.getElementById('log-empty').style.display='none';
+  const{data}=await db.from('access_log').select('*').order('logged_at',{ascending:false}).limit(300);
+  allLogs=data||[];
+  document.getElementById('log-loading').style.display='none';
+  renderLog();
+}
+
+function filterLog(f){
+  logFilter=f;
+  document.querySelectorAll('[id^=flt-]').forEach(b=>b.style.opacity='.4');
+  document.getElementById('flt-'+f).style.opacity='1';
+  renderLog();
+}
+
+function renderLog(){
+  const list=document.getElementById('access-log-list');
+  list.innerHTML='';
+  let entries=[...allLogs];
+  if(logFilter==='warn')entries=entries.filter(e=>e.flagged==='warn');
+  if(logFilter==='flag')entries=entries.filter(e=>e.flagged==='flag');
+  if(logFilter==='today')entries=entries.filter(e=>e.logged_at.startsWith(todayStr()));
+  if(!entries.length){document.getElementById('log-empty').style.display='block';return;}
+  document.getElementById('log-empty').style.display='none';
+  entries.forEach(entry=>{
+    const li=document.createElement('li');
+    li.className='log-entry';
+    const time=new Date(entry.logged_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const fl=entry.flagged==='flag'?'<span class="lff">⛔ FLAG</span>':entry.flagged==='warn'?'<span class="lfw">⚠ WARN</span>':'';
+    li.innerHTML=`<span class="lt">${time}</span><span class="la">${esc(entry.codename)}</span><span class="lm">${esc(entry.action)}</span>${fl}`;
+    list.appendChild(li);
+  });
+}
+
+// ── Log clear actions ──
+async function clearTodayLogs(){
+  if(!confirm("Delete all log entries from today?"))return;
+  const start=todayStr()+'T00:00:00';
+  const{error}=await db.from('access_log').delete().gte('logged_at',start);
+  if(error){toast(error.message,'terr');return;}
+  allLogs=allLogs.filter(e=>!e.logged_at.startsWith(todayStr()));
+  renderLog();await refreshStats();
+  toast("TODAY'S LOGS CLEARED");
+}
+
+async function clearLoginLogs(){
+  if(!confirm("Delete all LOGIN entries from the audit? Other events are kept."))return;
+  const{error}=await db.from('access_log').delete().eq('action','LOGIN');
+  if(error){toast(error.message,'terr');return;}
+  allLogs=allLogs.filter(e=>e.action!=='LOGIN');
+  renderLog();await refreshStats();
+  toast("ALL LOGIN ENTRIES CLEARED");
+}
+
+async function clearAllLogs(){
+  if(!confirm("⛔ WIPE ENTIRE AUDIT LOG? This cannot be undone."))return;
+  const{error}=await db.from('access_log').delete().neq('id','00000000-0000-0000-0000-000000000000');
+  if(error){toast(error.message,'terr');return;}
+  allLogs=[];
+  renderLog();await refreshStats();
+  toast("FULL AUDIT LOG WIPED");
+}
+
+async function clearOldLogs(){
+  if(!confirm("Delete all log entries from before today?"))return;
+  const{error}=await db.from('access_log').delete().lt('logged_at',todayStr());
+  if(error){toast(error.message,'terr');return;}
+  allLogs=allLogs.filter(e=>e.logged_at.startsWith(todayStr()));
+  renderLog();
+  toast("PRE-TODAY LOGS PURGED");
+}
+
+function startRealtime(){
+  if(realtimeSub)db.removeChannel(realtimeSub);
+  realtimeSub=db.channel('access_log_rt')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'access_log'},async payload=>{
+      allLogs.unshift(payload.new);
+      if(document.getElementById('tab-log').classList.contains('active'))renderLog();
+      await refreshStats();
+      if(payload.new.flagged==='flag')toast(`⛔ FLAG — ${payload.new.codename}: ${payload.new.action}`,'terr');
+      else if(payload.new.flagged==='warn')toast(`⚠ WARN — ${payload.new.codename}: ${payload.new.action}`,'twrn');
+    }).subscribe();
+}
+
+// ══════════════════════════════════════════════
+//  SETTINGS
+// ══════════════════════════════════════════════
+async function changeAdminPass(){
+  const cur=document.getElementById('s-cur').value;
+  const nxt=document.getElementById('s-new').value;
+  const cnf=document.getElementById('s-conf').value;
+  if(cur!==cfg.admin_password){toast('Current passphrase incorrect','terr');return;}
+  if(!nxt||nxt.length<6){toast('New passphrase must be 6+ characters','terr');return;}
+  if(nxt!==cnf){toast('Passphrases do not match','terr');return;}
+  const{error}=await db.from('admin_settings').update({admin_password:nxt}).eq('id',1);
+  if(error){toast(error.message,'terr');return;}
+  cfg.admin_password=nxt;
+  ['s-cur','s-new','s-conf'].forEach(id=>document.getElementById(id).value='');
+  toast('PASSPHRASE UPDATED');
+}
+
+async function saveThresholds(){
+  const w=parseInt(document.getElementById('s-warn').value);
+  const f=parseInt(document.getElementById('s-flag').value);
+  if(w>=f){toast('Flag threshold must be greater than warn threshold','terr');return;}
+  const{error}=await db.from('admin_settings').update({warn_threshold:w,flag_threshold:f}).eq('id',1);
+  if(error){toast(error.message,'terr');return;}
+  cfg.warn_threshold=w;cfg.flag_threshold=f;
+  toast(`THRESHOLDS SAVED — WARN:${w} FLAG:${f}`);
+}
+
+// ══════════════════════════════════════════════
 //  AGENT PORTAL
-// ══════════════════════════════════════════════════════
-function agentLogin() {
-  const pass = document.getElementById('agent-pass-input').value.trim();
-  const key  = document.getElementById('agent-key-input').value.trim().toUpperCase();
-
-  const agent = state.agents.find(a => a.password === pass);
-  const errEl = document.getElementById('agent-login-error');
-
-  if (!agent) {
-    errEl.style.display = 'block';
-    errEl.textContent = 'AUTHENTICATION FAILED — INVALID CREDENTIALS';
-    logAccess('UNKNOWN', 'FAILED_LOGIN', true, 'UNKNOWN');
-    return;
+// ══════════════════════════════════════════════
+async function agentLogin(){
+  const pass=document.getElementById('agent-pass-input').value.trim();
+  const key=document.getElementById('agent-key-input').value.trim().toUpperCase();
+  const errEl=document.getElementById('agent-login-error');
+  setBtn('agent-login-btn',true,'AUTHENTICATING...');
+  const{data:agents}=await db.from('agents').select('*').eq('password',pass);
+  setBtn('agent-login-btn',false,'◈ ACCESS RELAY ›');
+  if(!agents||!agents.length){
+    errEl.style.display='block';errEl.textContent='AUTHENTICATION FAILED — INVALID CREDENTIALS';
+    await logAccess('UNKNOWN','FAILED_LOGIN','flag',null);return;
   }
-
-  if (!key) {
-    errEl.style.display = 'block';
-    errEl.textContent = 'DAILY KEY REQUIRED';
-    return;
+  const agent=agents[0];
+  if(!key){errEl.style.display='block';errEl.textContent='DAILY KEY REQUIRED';return;}
+  const{data:kd}=await db.from('daily_keys').select('key').eq('date',todayStr()).maybeSingle();
+  if(kd&&key!==kd.key){
+    errEl.style.display='block';errEl.textContent='INVALID KEY — CONTACT COMMAND';
+    await logAccess(agent.codename,'WRONG_KEY','flag',agent.id);return;
   }
-
-  // Check if today's key matches (if admin set one)
-  if (state.dailyKey && key !== state.dailyKey) {
-    errEl.style.display = 'block';
-    errEl.textContent = 'INVALID KEY — CONTACT COMMAND';
-    logAccess(agent.codename, 'WRONG_KEY', true, agent.id);
-    save();
-    return;
+  const{data:freshCfg}=await db.from('admin_settings').select('*').eq('id',1).single();
+  if(freshCfg)cfg=freshCfg;
+  const{data:todayL}=await db.from('access_log').select('id').eq('agent_id',agent.id).eq('action','LOGIN').gte('logged_at',todayStr());
+  const lc=(todayL?.length||0)+1;
+  let flagged='';
+  if(lc>=cfg.flag_threshold)flagged='flag';
+  else if(lc>=cfg.warn_threshold)flagged='warn';
+  await logAccess(agent.codename,'LOGIN',flagged,agent.id);
+  currentAgent={...agent,sessionKey:key};
+  errEl.style.display='none';
+  document.getElementById('agent-login-screen').style.display='none';
+  document.getElementById('agent-dashboard').style.display='block';
+  document.getElementById('agent-welcome').textContent=`AUTHENTICATED // CODENAME: ${agent.codename} // SESSION ACTIVE`;
+  if(lc>1){
+    const wb=document.getElementById('agent-warning-banner');
+    wb.style.display='block';
+    wb.textContent=lc>=cfg.flag_threshold
+      ?`⛔ SECURITY ALERT: ${lc} logins detected on your account today. Command has been notified.`
+      :`⚠ WARNING: This is login #${lc} today. Command has been notified. If this wasn't you, alert command immediately.`;
   }
-
-  // Check multiple logins today
-  const today = todayStr();
-  const todayLogins = state.accessLog.filter(
-    l => l.agentId === agent.id && l.date === today && l.action === 'LOGIN'
-  ).length;
-
-  // Log the login
-  logAccess(agent.codename, 'LOGIN', false, agent.id);
-  save();
-
-  currentAgent = { ...agent, sessionKey: key };
-
-  document.getElementById('agent-login-screen').style.display = 'none';
-  document.getElementById('agent-dashboard').style.display = 'block';
-
-  document.getElementById('agent-welcome').textContent =
-    `AUTHENTICATED // CODENAME: ${agent.codename} // SESSION ACTIVE`;
-
-  if (todayLogins >= 1) {
-    const warnEl = document.getElementById('agent-warning-banner');
-    warnEl.style.display = 'block';
-    if (todayLogins === 1) {
-      warnEl.textContent = `⚠ WARNING: This is your 2nd login today. Command has been notified. If this was not you, alert command immediately.`;
-    } else {
-      warnEl.textContent = `⛔ SECURITY ALERT: Multiple logins detected on this account today. This has been flagged. Contact command.`;
-    }
-  }
-
   toast(`CODENAME ${agent.codename} — RELAY ACTIVE`);
 }
 
-function encryptAgentMessage() {
-  const raw = document.getElementById('agent-message-input').value.trim();
-  if (!raw) { toast('No message to encrypt', true); return; }
-  if (!currentAgent) { toast('Session expired', true); return; }
-
-  const tagged = `[${currentAgent.codename}] ${raw}`;
-  const enc = encrypt(tagged, currentAgent.sessionKey);
-
-  logAccess(currentAgent.codename, 'RELAY_SENT', false, currentAgent.id);
-  save();
-
-  document.getElementById('agent-encrypted-output').style.display = 'block';
-  document.getElementById('encrypted-text').textContent = enc;
-
+async function encryptAgentMessage(){
+  const raw=document.getElementById('agent-message-input').value.trim();
+  if(!raw){toast('No message to encrypt','terr');return;}
+  if(!currentAgent){toast('Session expired','terr');return;}
+  const tagged=`[${currentAgent.codename}] ${raw}`;
+  const enc=encrypt(tagged,currentAgent.sessionKey);
+  await logAccess(currentAgent.codename,'RELAY_SENT','',currentAgent.id);
+  document.getElementById('agent-encrypted-output').style.display='block';
+  document.getElementById('encrypted-text').textContent=enc;
   toast('MESSAGE ENCRYPTED — READY TO RELAY');
-  if (adminAuthed) refreshAdminUI();
 }
 
-function copyEncrypted() {
-  const txt = document.getElementById('encrypted-text').textContent;
-  navigator.clipboard.writeText(txt).then(() => toast('COPIED TO CLIPBOARD'))
-    .catch(() => {
-      // Fallback
-      const ta = document.createElement('textarea');
-      ta.value = txt;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      toast('COPIED TO CLIPBOARD');
-    });
+function copyEncrypted(){
+  const txt=document.getElementById('encrypted-text').textContent;
+  navigator.clipboard.writeText(txt).then(()=>toast('COPIED TO CLIPBOARD')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('COPIED TO CLIPBOARD');
+  });
 }
 
-function clearAgentSession() {
-  currentAgent = null;
-  document.getElementById('agent-dashboard').style.display = 'none';
-  document.getElementById('agent-login-screen').style.display = 'block';
-  document.getElementById('agent-pass-input').value = '';
-  document.getElementById('agent-key-input').value = '';
-  document.getElementById('agent-message-input').value = '';
-  document.getElementById('agent-encrypted-output').style.display = 'none';
-  document.getElementById('agent-warning-banner').style.display = 'none';
+function clearAgentSession(){
+  currentAgent=null;
+  document.getElementById('agent-dashboard').style.display='none';
+  document.getElementById('agent-login-screen').style.display='block';
+  ['agent-pass-input','agent-key-input','agent-message-input'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('agent-encrypted-output').style.display='none';
+  document.getElementById('agent-warning-banner').style.display='none';
   toast('SESSION CLEARED');
-}
-
-// ══════════════════════════════════════════════════════
-//  HELPERS
-// ══════════════════════════════════════════════════════
-function escapeHTML(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-// ══════════════════════════════════════════════════════
-//  INIT
-// ══════════════════════════════════════════════════════
-// Seed demo agents if empty (remove in production)
-if (state.agents.length === 0) {
-  state.agents = [
-    { codename: 'PHANTOM', password: 'PH7K2MQR', id: '1001' },
-    { codename: 'RAVEN',   password: 'RV9X4LWZ', id: '1002' },
-    { codename: 'GHOST',   password: 'GH3N8PVT', id: '1003' },
-  ];
-  state.dailyKey = 'FALCON';
-  save();
 }
 </script>
 </body>
