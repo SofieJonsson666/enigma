@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ENIGMA // FIELD OPERATIONS</title>
+<title>BEDROCK CORPORATION // INTELLIGENCE</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Oswald:wght@300;400;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
-  --green:#00ff88;--green-dim:#00cc66;--green-dark:#003322;
+  --maincolor:#c9bbd0;--maincolor-dim:#935f8b;--maincolor-dark:#694464;
   --amber:#ffb800;--amber-dim:#cc9200;
   --red:#ff3344;--red-dim:#cc1122;
-  --bg:#050a07;--bg2:#0a1410;--panel:#0d1a14;
+  --bg:#100b12;--bg2:#150e19;--panel:#1b1220;
   --border:#1a3328;--border-lit:#2a5542;
   --text:#c8ffe0;--text-dim:#5a8870;--text-muted:#2a5040;
 }
@@ -22,37 +22,37 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
 /* ── HEADER ── */
 .header{border-bottom:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;background:var(--bg2);}
-.logo{font-family:'Oswald',sans-serif;font-weight:600;font-size:22px;letter-spacing:8px;color:var(--green);text-shadow:0 0 20px rgba(0,255,136,.4);}
+.logo{font-family:'Oswald',sans-serif;font-weight:600;font-size:22px;letter-spacing:8px;color:var(--maincolor);text-shadow:0 0 20px rgba(0,255,136,.4);}
 .logo span{color:var(--text-dim);font-weight:300;font-size:11px;letter-spacing:4px;display:block;margin-top:2px;}
 .status-bar{display:flex;gap:20px;align-items:center;}
-.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 7px var(--green);animation:pulse 2s infinite;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--maincolor);box-shadow:0 0 7px var(--maincolor);animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .status-label{font-size:11px;color:var(--text-dim);letter-spacing:2px;}
-.clock{font-size:12px;color:var(--green-dim);letter-spacing:2px;}
+.clock{font-size:12px;color:var(--maincolor-dim);letter-spacing:2px;}
 
 /* ── NAV ── */
 .nav{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 32px;}
 .nav-btn{background:none;border:none;cursor:pointer;padding:13px 22px;font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:3px;color:var(--text-dim);border-bottom:2px solid transparent;transition:all .2s;}
 .nav-btn:hover{color:var(--text);}
-.nav-btn.active{color:var(--green);border-bottom-color:var(--green);}
+.nav-btn.active{color:var(--maincolor);border-bottom-color:var(--maincolor);}
 
 .main{padding:28px 32px;max-width:1400px;margin:0 auto;}
 
 /* ── PANELS ── */
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:2px;padding:22px;margin-bottom:18px;}
 .ph{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:13px;border-bottom:1px solid var(--border);}
-.pt{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:4px;color:var(--green);}
+.pt{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:4px;color:var(--maincolor);}
 .pb{font-size:10px;padding:2px 8px;border:1px solid var(--border-lit);color:var(--text-dim);letter-spacing:2px;}
 
 /* ── FORMS ── */
 .field{margin-bottom:14px;}
 .field label{display:block;font-size:11px;letter-spacing:2px;color:var(--text-dim);margin-bottom:5px;}
 .field input,.field textarea,.field select{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:13px;padding:9px 12px;outline:none;transition:border-color .2s;border-radius:1px;}
-.field input:focus,.field textarea:focus{border-color:var(--green-dim);box-shadow:0 0 0 1px rgba(0,255,136,.08);}
+.field input:focus,.field textarea:focus{border-color:var(--maincolor-dim);box-shadow:0 0 0 1px rgba(0,255,136,.08);}
 .field textarea{resize:vertical;min-height:90px;line-height:1.6;}
 
 /* ── BUTTONS ── */
-.btn{display:inline-flex;align-items:center;gap:7px;background:none;border:1px solid var(--green-dim);color:var(--green);font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:3px;padding:9px 20px;cursor:pointer;transition:all .2s;border-radius:1px;}
+.btn{display:inline-flex;align-items:center;gap:7px;background:none;border:1px solid var(--maincolor-dim);color:var(--maincolor);font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:3px;padding:9px 20px;cursor:pointer;transition:all .2s;border-radius:1px;}
 .btn:hover{background:rgba(0,255,136,.07);box-shadow:0 0 10px rgba(0,255,136,.12);}
 .btn:active{transform:scale(.98);}
 .btn:disabled{opacity:.4;cursor:not-allowed;}
@@ -68,7 +68,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 /* ── STATS ── */
 .stat-row{display:flex;gap:14px;margin-bottom:18px;}
 .sc{flex:1;background:var(--bg);border:1px solid var(--border);padding:14px 18px;}
-.sn{font-family:'Oswald',sans-serif;font-size:30px;color:var(--green);line-height:1;}
+.sn{font-family:'Oswald',sans-serif;font-size:30px;color:var(--maincolor);line-height:1;}
 .sl{font-size:10px;letter-spacing:2px;color:var(--text-dim);margin-top:3px;}
 .sc.sw .sn{color:var(--amber);}
 .sc.sd .sn{color:var(--red);}
@@ -77,7 +77,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .tab-row{display:flex;border-bottom:1px solid var(--border);margin-bottom:18px;}
 .tab-btn{background:none;border:none;cursor:pointer;padding:9px 18px;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;color:var(--text-dim);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;}
 .tab-btn:hover{color:var(--text);}
-.tab-btn.active{color:var(--green);border-bottom-color:var(--green);}
+.tab-btn.active{color:var(--maincolor);border-bottom-color:var(--maincolor);}
 .tab-content{display:none;}
 .tab-content.active{display:block;}
 
@@ -86,35 +86,35 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .agent-table th{text-align:left;font-size:10px;letter-spacing:3px;color:var(--text-muted);padding:7px 10px;border-bottom:1px solid var(--border);font-weight:400;}
 .agent-table td{padding:10px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle;}
 .agent-table tr:hover td{background:rgba(0,255,136,.02);}
-.cn{color:var(--green);font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:3px;}
-.aok{color:var(--green-dim);font-size:11px;}
+.cn{color:var(--maincolor);font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:3px;}
+.aok{color:var(--maincolor-dim);font-size:11px;}
 .awk{color:var(--amber);font-size:11px;}
 .afg{color:var(--red);font-size:11px;animation:flicker 1s infinite;}
 @keyframes flicker{0%,100%{opacity:1}50%{opacity:.55}}
 
 /* inline edit inputs inside table */
 .edit-input{background:var(--bg);border:1px solid var(--border-lit);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:12px;padding:5px 8px;outline:none;border-radius:1px;width:100%;}
-.edit-input:focus{border-color:var(--green-dim);}
+.edit-input:focus{border-color:var(--maincolor-dim);}
 .edit-row td{background:rgba(0,255,136,.04)!important;}
 
 /* ── LOG ── */
 .log-list{list-style:none;}
 .log-entry{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:11px;}
 .lt{color:var(--text-muted);min-width:105px;}
-.la{color:var(--green);min-width:100px;letter-spacing:2px;}
+.la{color:var(--maincolor);min-width:100px;letter-spacing:2px;}
 .lm{color:var(--text-dim);flex:1;}
 .lfw{color:var(--amber);font-size:10px;letter-spacing:1px;}
 .lff{color:var(--red);font-size:10px;letter-spacing:1px;animation:flicker 1s infinite;}
 
 /* ── DECODE ── */
-.decode-result{background:var(--bg);border:1px solid var(--border-lit);padding:14px;margin-top:14px;font-size:13px;line-height:1.8;color:var(--green);letter-spacing:1px;min-height:50px;}
+.decode-result{background:var(--bg);border:1px solid var(--border-lit);padding:14px;margin-top:14px;font-size:13px;line-height:1.8;color:var(--maincolor);letter-spacing:1px;min-height:50px;}
 .decode-meta{font-size:11px;color:var(--text-dim);margin-bottom:7px;letter-spacing:1px;}
 
 /* ── CIPHER ── */
 .cipher-display{background:var(--bg);border:1px solid var(--border);padding:14px;font-size:11px;letter-spacing:2px;color:var(--text-dim);word-break:break-all;line-height:2;font-family:'Space Mono',monospace;}
 
 /* ── TOAST ── */
-.toast{position:fixed;bottom:28px;right:28px;background:var(--bg2);border:1px solid var(--border-lit);padding:12px 20px;font-size:11px;letter-spacing:2px;color:var(--green);z-index:10000;transform:translateY(70px);opacity:0;transition:all .3s;max-width:340px;line-height:1.5;}
+.toast{position:fixed;bottom:28px;right:28px;background:var(--bg2);border:1px solid var(--border-lit);padding:12px 20px;font-size:11px;letter-spacing:2px;color:var(--maincolor);z-index:10000;transform:translateY(70px);opacity:0;transition:all .3s;max-width:340px;line-height:1.5;}
 .toast.show{transform:translateY(0);opacity:1;}
 .toast.terr{border-color:var(--red-dim);color:var(--red);}
 .toast.twrn{border-color:var(--amber-dim);color:var(--amber);}
@@ -125,17 +125,17 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
 /* ── BANNERS ── */
 .wb{background:rgba(255,51,68,.09);border:1px solid var(--red-dim);padding:9px 14px;font-size:11px;color:var(--red);letter-spacing:1px;margin-bottom:14px;}
-.sb{background:rgba(0,255,136,.06);border:1px solid var(--border-lit);padding:9px 14px;font-size:11px;color:var(--green);letter-spacing:1px;margin-bottom:14px;}
+.sb{background:rgba(0,255,136,.06);border:1px solid var(--border-lit);padding:9px 14px;font-size:11px;color:var(--maincolor);letter-spacing:1px;margin-bottom:14px;}
 
 /* ── LOADING ── */
 .loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;gap:18px;}
-.lt2{font-family:'Oswald',sans-serif;letter-spacing:6px;font-size:20px;color:var(--green);animation:pulse 1s infinite;}
+.lt2{font-family:'Oswald',sans-serif;letter-spacing:6px;font-size:20px;color:var(--maincolor);animation:pulse 1s infinite;}
 .ls{font-size:11px;color:var(--text-dim);letter-spacing:3px;}
 
 /* ── MODAL ── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;}
 .modal{background:var(--panel);border:1px solid var(--border-lit);padding:28px;width:100%;max-width:420px;border-radius:2px;}
-.modal-title{font-family:'Oswald',sans-serif;font-size:15px;letter-spacing:4px;color:var(--green);margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.modal-title{font-family:'Oswald',sans-serif;font-size:15px;letter-spacing:4px;color:var(--maincolor);margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border);}
 .modal-actions{display:flex;gap:10px;margin-top:18px;}
 
 /* ── MISC ── */
@@ -144,7 +144,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .reveal:hover .redacted{background:transparent;color:var(--amber);}
 .blink{animation:blink 1s step-end infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 1.5s infinite;margin-right:5px;vertical-align:middle;}
+.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--maincolor);box-shadow:0 0 6px var(--maincolor);animation:pulse 1.5s infinite;margin-right:5px;vertical-align:middle;}
 .dim{color:var(--text-dim);}
 .small{font-size:11px;letter-spacing:1px;}
 .flex-gap{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
@@ -163,7 +163,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 <body>
 
 <div class="loading-overlay" id="loading-overlay">
-  <div class="lt2">ENIGMA</div>
+  <div class="lt2">BEDROCK CORPORATION</div>
   <div class="ls">ESTABLISHING SECURE LINK...</div>
 </div>
 
@@ -188,7 +188,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 </div>
 
 <div class="header">
-  <div><div class="logo">ENIGMA<span>FIELD OPERATIONS TERMINAL</span></div></div>
+  <div><div class="logo">BEDROCK CORPORATION<span>INTELLIGENCE TERMINAL</span></div></div>
   <div class="status-bar">
     <div class="status-dot"></div>
     <div class="status-label" id="db-status">CONNECTING...</div>
@@ -211,9 +211,9 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
     <div style="max-width:380px;margin:60px auto;">
       <div class="panel">
         <div class="ph"><div class="pt">COMMAND ACCESS</div><div class="pb">ADMIN</div></div>
-        <p class="dim small" style="margin-bottom:18px;">Enter administrator passphrase to access command panel.</p>
-        <div class="field"><label>ADMIN PASSPHRASE</label>
-          <input type="password" id="admin-pass-input" placeholder="passphrase..." onkeydown="if(event.key==='Enter')adminLogin()">
+        <p class="dim small" style="margin-bottom:18px;">Enter administrator password to access command panel.</p>
+        <div class="field"><label>ADMIN PASSWORD</label>
+          <input type="password" id="admin-pass-input" placeholder="password..." onkeydown="if(event.key==='Enter')adminLogin()">
         </div>
         <button class="btn bf" onclick="adminLogin()" id="admin-login-btn">AUTHENTICATE ›</button>
         <p id="admin-login-err" style="color:var(--red);font-size:11px;margin-top:9px;display:none;letter-spacing:1px;"></p>
@@ -246,10 +246,10 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           <div class="panel">
             <div class="ph"><div class="pt">ENROLL NEW AGENT</div><div class="pb">REGISTER</div></div>
             <div class="field"><label>CODENAME</label>
-              <input type="text" id="reg-codename" placeholder="e.g. PHANTOM, RAVEN..." style="text-transform:uppercase;">
+              <input type="text" id="reg-codename" placeholder="e.g. CREST, CONOMY..." style="text-transform:uppercase;">
             </div>
             <div class="field"><label>PASSWORD (blank = auto-generate)</label>
-              <input type="text" id="reg-password" placeholder="auto-generate if empty">
+              <input type="text" id="reg-password" placeholder="set agents password">
             </div>
             <button class="btn" onclick="registerAgent()">◈ ENROLL AGENT</button>
           </div>
@@ -257,9 +257,9 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           <!-- Daily key -->
           <div class="panel">
             <div class="ph"><div class="pt">DAILY KEY</div><div class="pb">CIPHER</div></div>
-            <p class="dim small" style="margin-bottom:14px;">Issue today's cipher key. Say it publicly or DM each agent — only they know it's THE key.</p>
+            <p class="dim small" style="margin-bottom:14px;">Issue today's cipher key.</p>
             <div class="field"><label>SET TODAY'S KEY</label>
-              <input type="text" id="daily-key-input" placeholder="e.g. FALCON, STORM..." style="text-transform:uppercase;letter-spacing:3px;">
+              <input type="text" id="daily-key-input" placeholder="e.g. PINE, CREST..." style="text-transform:uppercase;letter-spacing:3px;">
             </div>
             <div class="flex-gap">
               <button class="btn" onclick="setDailyKey()">◈ SET KEY</button>
@@ -352,11 +352,11 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
       <div class="g2">
         <div class="panel">
           <div class="ph"><div class="pt">ADMIN CREDENTIALS</div><div class="pb">SECURITY</div></div>
-          <p class="dim small" style="margin-bottom:14px;">Change the admin passphrase used to access this panel.</p>
-          <div class="field"><label>CURRENT PASSPHRASE</label><input type="password" id="s-cur" placeholder="current..."></div>
-          <div class="field"><label>NEW PASSPHRASE</label><input type="password" id="s-new" placeholder="new (6+ chars)..."></div>
+          <p class="dim small" style="margin-bottom:14px;">Change the admin password.</p>
+          <div class="field"><label>CURRENT PASSWORD</label><input type="password" id="s-cur" placeholder="current..."></div>
+          <div class="field"><label>NEW PASSWORD</label><input type="password" id="s-new" placeholder="new (6+ chars)..."></div>
           <div class="field"><label>CONFIRM NEW</label><input type="password" id="s-conf" placeholder="confirm..."></div>
-          <button class="btn" onclick="changeAdminPass()">◈ UPDATE PASSPHRASE</button>
+          <button class="btn" onclick="changeAdminPass()">◈ UPDATE PASSWORD</button>
         </div>
 
         <div class="panel">
@@ -384,10 +384,10 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
   <div id="agent-login-screen">
     <div style="max-width:420px;margin:55px auto;">
-      <div class="dim small" style="margin-bottom:8px;letter-spacing:2px;">&gt; ENIGMA FIELD RELAY v2.4 <span class="blink">_</span></div>
+      <div class="dim small" style="margin-bottom:8px;letter-spacing:2px;">&gt; BEDROCK <span class="blink">_</span></div>
       <div class="panel">
         <div class="ph"><div class="pt">AGENT AUTHENTICATION</div></div>
-        <p class="dim small" style="margin-bottom:18px;">Enter your assigned password and today's key provided by command.</p>
+        <p class="dim small" style="margin-bottom:18px;">Enter your password and today's key</p>
         <div class="field"><label>AGENT PASSWORD</label>
           <input type="password" id="agent-pass-input" placeholder="your unique password..." onkeydown="if(event.key==='Enter')agentLogin()">
         </div>
@@ -408,14 +408,14 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
         <div class="ph"><div class="pt">SECURE RELAY</div><div class="pb">ENCRYPT</div></div>
         <p class="dim small" style="margin-bottom:14px;">Type your intel. Your codename is prepended automatically. Encrypt — then relay the output via any channel.</p>
         <div class="field"><label>INTEL / MESSAGE</label>
-          <textarea id="agent-message-input" placeholder="Type your intel here...&#10;E.g: Enemy patrol at sector 7, moving south every 2 hrs."></textarea>
+          <textarea id="agent-message-input" placeholder="Type your intel here...&#10;E.g: News of enemy operations in the pine forest"></textarea>
         </div>
         <button class="btn bf" onclick="encryptAgentMessage()">◈ ENCRYPT & PREPARE RELAY</button>
       </div>
       <div id="agent-encrypted-output" style="display:none;">
         <div class="panel">
           <div class="ph"><div class="pt">ENCRYPTED RELAY</div><div class="pb">TRANSMIT</div></div>
-          <p class="dim small" style="margin-bottom:10px;">Copy and send to command via any channel. To anyone else it looks like noise.</p>
+          <p class="dim small" style="margin-bottom:10px;">Copy and send to command via any channel. This message will be encrypted and unreadable</p>
           <div class="cipher-display" id="encrypted-text"></div>
           <div class="flex-gap" style="margin-top:14px;">
             <button class="btn" onclick="copyEncrypted()">◈ COPY</button>
@@ -541,7 +541,7 @@ async function adminLogin(){
   if(data)cfg=data;
   setBtn('admin-login-btn',false,'AUTHENTICATE ›');
   if(pass!==cfg.admin_password){
-    errEl.style.display='block';errEl.textContent='AUTHENTICATION FAILED — INVALID PASSPHRASE';
+    errEl.style.display='block';errEl.textContent='AUTHENTICATION FAILED — INVALID PASSWORD';
     await logAccess('UNKNOWN','ADMIN_FAIL','flag',null);return;
   }
   adminAuthed=true;errEl.style.display='none';
@@ -800,14 +800,14 @@ async function changeAdminPass(){
   const cur=document.getElementById('s-cur').value;
   const nxt=document.getElementById('s-new').value;
   const cnf=document.getElementById('s-conf').value;
-  if(cur!==cfg.admin_password){toast('Current passphrase incorrect','terr');return;}
-  if(!nxt||nxt.length<6){toast('New passphrase must be 6+ characters','terr');return;}
-  if(nxt!==cnf){toast('Passphrases do not match','terr');return;}
+  if(cur!==cfg.admin_password){toast('Current password incorrect','terr');return;}
+  if(!nxt||nxt.length<6){toast('New password must be 6+ characters','terr');return;}
+  if(nxt!==cnf){toast('Passwords do not match','terr');return;}
   const{error}=await db.from('admin_settings').update({admin_password:nxt}).eq('id',1);
   if(error){toast(error.message,'terr');return;}
   cfg.admin_password=nxt;
   ['s-cur','s-new','s-conf'].forEach(id=>document.getElementById(id).value='');
-  toast('PASSPHRASE UPDATED');
+  toast('PASSWORD UPDATED');
 }
 
 async function saveThresholds(){
