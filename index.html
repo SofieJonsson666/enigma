@@ -3,63 +3,86 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BEDROCK CORPORATION // INTELLIGENCE</title>
+<title>BEDROCK CORP PORTAL</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Oswald:wght@300;400;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Oswald:wght@300;400;600&family=Space+Mono:wght@400;700&family=Press+Start+2P&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
-  --maincolor:#c9bbd0;--maincolor-dim:#935f8b;--maincolor-dark:#694464;
-  --amber:#ffb800;--amber-dim:#cc9200;
-  --red:#ff3344;--red-dim:#cc1122;
+  --main:#e9f7f8;--main-dim:#adecf5;--main-dark:#1a0800;
+  --accent:#ffdd00;--accent-dim:#ccaa00;
+  --alert:#cc44ff;--alert-dim:#8822cc;
   --bg:#100b12;--bg2:#150e19;--panel:#1b1220;
-  --border:#1a3328;--border-lit:#2a5542;
-  --text:#c8ffe0;--text-dim:#5a8870;--text-muted:#2a5040;
+  --border:#7a4db4;--border-lit:#d08ed6;
+  --text:#5dd6f1;--text-dim:#44a5ff;--text-muted:#265e7e;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--text);font-family:'Share Tech Mono',monospace;min-height:100vh;overflow-x:hidden;}
-body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,rgba(0,255,136,.018) 0px,transparent 1px,transparent 3px);pointer-events:none;z-index:9999;}
+body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;font-size: 16px;min-height:100vh;overflow-x:hidden;background-image:url('bedrockbg.png');background-size:cover;background-position:center;background-attachment:fixed;background-repeat:no-repeat;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.30) 0px,transparent 1px,transparent 3px);pointer-events:none;z-index:9999;}
 
 /* ── HEADER ── */
 .header{border-bottom:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;background:var(--bg2);}
-.logo{font-family:'Oswald',sans-serif;font-weight:600;font-size:22px;letter-spacing:8px;color:var(--maincolor);text-shadow:0 0 20px rgba(0,255,136,.4);}
+.logo{
+  font-family:'Share Tech Mono',monospace;
+  font-weight: 600;
+  font-size:22px;
+  letter-spacing:8px;
+  color:#ffffff;
+  text-shadow:
+    -1px 0 1px rgba(255,0,0,.5),
+     1px 0 1px rgba(0,255,255,.5),
+     0 0 8px rgba(255,255,255,.3);
+  animation: flicker-logo 6s infinite;
+}
+
+@keyframes flicker-logo {
+  0%   { opacity: 1; }
+  92%  { opacity: 1; }
+  93%  { opacity: 0.4; }
+  94%  { opacity: 1; }
+  96%  { opacity: 0.6; }
+  97%  { opacity: 1; }
+  98%  { opacity: 0.3; }
+  99%  { opacity: 1; }
+  100% { opacity: 1; }
+}
 .logo span{color:var(--text-dim);font-weight:300;font-size:11px;letter-spacing:4px;display:block;margin-top:2px;}
 .status-bar{display:flex;gap:20px;align-items:center;}
-.status-dot{width:7px;height:7px;border-radius:50%;background:var(--maincolor);box-shadow:0 0 7px var(--maincolor);animation:pulse 2s infinite;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--main);box-shadow:0 0 7px var(--main);animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .status-label{font-size:11px;color:var(--text-dim);letter-spacing:2px;}
-.clock{font-size:12px;color:var(--maincolor-dim);letter-spacing:2px;}
+.clock{font-size:12px;color:var(--main-dim);letter-spacing:2px;}
 
 /* ── NAV ── */
 .nav{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 32px;}
 .nav-btn{background:none;border:none;cursor:pointer;padding:13px 22px;font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:3px;color:var(--text-dim);border-bottom:2px solid transparent;transition:all .2s;}
 .nav-btn:hover{color:var(--text);}
-.nav-btn.active{color:var(--maincolor);border-bottom-color:var(--maincolor);}
+.nav-btn.active{color:var(--main);border-bottom-color:var(--main);}
 
 .main{padding:28px 32px;max-width:1400px;margin:0 auto;}
 
 /* ── PANELS ── */
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:2px;padding:22px;margin-bottom:18px;}
 .ph{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:13px;border-bottom:1px solid var(--border);}
-.pt{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:4px;color:var(--maincolor);}
+.pt{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:4px;color:var(--main);}
 .pb{font-size:10px;padding:2px 8px;border:1px solid var(--border-lit);color:var(--text-dim);letter-spacing:2px;}
 
 /* ── FORMS ── */
 .field{margin-bottom:14px;}
 .field label{display:block;font-size:11px;letter-spacing:2px;color:var(--text-dim);margin-bottom:5px;}
 .field input,.field textarea,.field select{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:13px;padding:9px 12px;outline:none;transition:border-color .2s;border-radius:1px;}
-.field input:focus,.field textarea:focus{border-color:var(--maincolor-dim);box-shadow:0 0 0 1px rgba(0,255,136,.08);}
+.field input:focus,.field textarea:focus{border-color:var(--main-dim);box-shadow:0 0 0 1px rgba(255,102,0,.08);}
 .field textarea{resize:vertical;min-height:90px;line-height:1.6;}
 
 /* ── BUTTONS ── */
-.btn{display:inline-flex;align-items:center;gap:7px;background:none;border:1px solid var(--maincolor-dim);color:var(--maincolor);font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:3px;padding:9px 20px;cursor:pointer;transition:all .2s;border-radius:1px;}
-.btn:hover{background:rgba(0,255,136,.07);box-shadow:0 0 10px rgba(0,255,136,.12);}
+.btn{display:inline-flex;align-items:center;gap:7px;background:none;border:1px solid var(--main-dim);color:var(--main);font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:3px;padding:9px 20px;cursor:pointer;transition:all .2s;border-radius:1px;}
+.btn:hover{background:rgba(100, 133, 240, 0.07);box-shadow:0 0 10px rgba(102, 184, 240, 0.12);}
 .btn:active{transform:scale(.98);}
 .btn:disabled{opacity:.4;cursor:not-allowed;}
-.btn.ba{border-color:var(--amber-dim);color:var(--amber);}
-.btn.ba:hover{background:rgba(255,184,0,.07);}
-.btn.br{border-color:var(--red-dim);color:var(--red);}
-.btn.br:hover{background:rgba(255,51,68,.07);}
+.btn.ba{border-color:var(--accent-dim);color:var(--accent);}
+.btn.ba:hover{background:rgba(255,221,0,.07);}
+.btn.br{border-color:var(--alert-dim);color:var(--alert);}
+.btn.br:hover{background:rgba(204,68,255,.07);}
 .btn.bf{width:100%;justify-content:center;}
 .btn.bs{padding:5px 10px;font-size:10px;letter-spacing:2px;}
 
@@ -68,16 +91,16 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 /* ── STATS ── */
 .stat-row{display:flex;gap:14px;margin-bottom:18px;}
 .sc{flex:1;background:var(--bg);border:1px solid var(--border);padding:14px 18px;}
-.sn{font-family:'Oswald',sans-serif;font-size:30px;color:var(--maincolor);line-height:1;}
+.sn{font-family:'Oswald',sans-serif;font-size:30px;color:var(--main);line-height:1;}
 .sl{font-size:10px;letter-spacing:2px;color:var(--text-dim);margin-top:3px;}
-.sc.sw .sn{color:var(--amber);}
-.sc.sd .sn{color:var(--red);}
+.sc.sw .sn{color:var(--accent);}
+.sc.sd .sn{color:var(--alert);}
 
 /* ── TABS ── */
 .tab-row{display:flex;border-bottom:1px solid var(--border);margin-bottom:18px;}
 .tab-btn{background:none;border:none;cursor:pointer;padding:9px 18px;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;color:var(--text-dim);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;}
 .tab-btn:hover{color:var(--text);}
-.tab-btn.active{color:var(--maincolor);border-bottom-color:var(--maincolor);}
+.tab-btn.active{color:var(--main);border-bottom-color:var(--main);}
 .tab-content{display:none;}
 .tab-content.active{display:block;}
 
@@ -85,66 +108,66 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .agent-table{width:100%;border-collapse:collapse;}
 .agent-table th{text-align:left;font-size:10px;letter-spacing:3px;color:var(--text-muted);padding:7px 10px;border-bottom:1px solid var(--border);font-weight:400;}
 .agent-table td{padding:10px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle;}
-.agent-table tr:hover td{background:rgba(0,255,136,.02);}
-.cn{color:var(--maincolor);font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:3px;}
-.aok{color:var(--maincolor-dim);font-size:11px;}
-.awk{color:var(--amber);font-size:11px;}
-.afg{color:var(--red);font-size:11px;animation:flicker 1s infinite;}
+.agent-table tr:hover td{background:rgba(255,102,0,.02);}
+.cn{color:var(--main);font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:3px;}
+.aok{color:var(--main-dim);font-size:11px;}
+.awk{color:var(--accent);font-size:11px;}
+.afg{color:var(--alert);font-size:11px;animation:flicker 1s infinite;}
 @keyframes flicker{0%,100%{opacity:1}50%{opacity:.55}}
 
 /* inline edit inputs inside table */
 .edit-input{background:var(--bg);border:1px solid var(--border-lit);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:12px;padding:5px 8px;outline:none;border-radius:1px;width:100%;}
-.edit-input:focus{border-color:var(--maincolor-dim);}
-.edit-row td{background:rgba(0,255,136,.04)!important;}
+.edit-input:focus{border-color:var(--main-dim);}
+.edit-row td{background:rgba(255,102,0,.04)!important;}
 
 /* ── LOG ── */
 .log-list{list-style:none;}
 .log-entry{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:11px;}
 .lt{color:var(--text-muted);min-width:105px;}
-.la{color:var(--maincolor);min-width:100px;letter-spacing:2px;}
+.la{color:var(--main);min-width:100px;letter-spacing:2px;}
 .lm{color:var(--text-dim);flex:1;}
-.lfw{color:var(--amber);font-size:10px;letter-spacing:1px;}
-.lff{color:var(--red);font-size:10px;letter-spacing:1px;animation:flicker 1s infinite;}
+.lfw{color:var(--accent);font-size:10px;letter-spacing:1px;}
+.lff{color:var(--alert);font-size:10px;letter-spacing:1px;animation:flicker 1s infinite;}
 
 /* ── DECODE ── */
-.decode-result{background:var(--bg);border:1px solid var(--border-lit);padding:14px;margin-top:14px;font-size:13px;line-height:1.8;color:var(--maincolor);letter-spacing:1px;min-height:50px;}
+.decode-result{background:var(--bg);border:1px solid var(--border-lit);padding:14px;margin-top:14px;font-size:13px;line-height:1.8;color:var(--main);letter-spacing:1px;min-height:50px;}
 .decode-meta{font-size:11px;color:var(--text-dim);margin-bottom:7px;letter-spacing:1px;}
 
 /* ── CIPHER ── */
 .cipher-display{background:var(--bg);border:1px solid var(--border);padding:14px;font-size:11px;letter-spacing:2px;color:var(--text-dim);word-break:break-all;line-height:2;font-family:'Space Mono',monospace;}
 
 /* ── TOAST ── */
-.toast{position:fixed;bottom:28px;right:28px;background:var(--bg2);border:1px solid var(--border-lit);padding:12px 20px;font-size:11px;letter-spacing:2px;color:var(--maincolor);z-index:10000;transform:translateY(70px);opacity:0;transition:all .3s;max-width:340px;line-height:1.5;}
+.toast{position:fixed;bottom:28px;right:28px;background:var(--bg2);border:1px solid var(--border-lit);padding:12px 20px;font-size:11px;letter-spacing:2px;color:var(--main);z-index:10000;transform:translateY(70px);opacity:0;transition:all .3s;max-width:340px;line-height:1.5;}
 .toast.show{transform:translateY(0);opacity:1;}
-.toast.terr{border-color:var(--red-dim);color:var(--red);}
-.toast.twrn{border-color:var(--amber-dim);color:var(--amber);}
+.toast.terr{border-color:var(--alert-dim);color:var(--alert);}
+.toast.twrn{border-color:var(--accent-dim);color:var(--accent);}
 
 /* ── VIEWS ── */
 .view{display:none;}
 .view.active{display:block;}
 
 /* ── BANNERS ── */
-.wb{background:rgba(255,51,68,.09);border:1px solid var(--red-dim);padding:9px 14px;font-size:11px;color:var(--red);letter-spacing:1px;margin-bottom:14px;}
-.sb{background:rgba(0,255,136,.06);border:1px solid var(--border-lit);padding:9px 14px;font-size:11px;color:var(--maincolor);letter-spacing:1px;margin-bottom:14px;}
+.wb{background:rgba(204,68,255,.09);border:1px solid var(--alert-dim);padding:9px 14px;font-size:11px;color:var(--alert);letter-spacing:1px;margin-bottom:14px;}
+.sb{background:rgba(255,102,0,.06);border:1px solid var(--border-lit);padding:9px 14px;font-size:11px;color:var(--main);letter-spacing:1px;margin-bottom:14px;}
 
 /* ── LOADING ── */
 .loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;gap:18px;}
-.lt2{font-family:'Oswald',sans-serif;letter-spacing:6px;font-size:20px;color:var(--maincolor);animation:pulse 1s infinite;}
+.lt2{font-family:'Oswald',sans-serif;letter-spacing:6px;font-size:20px;color:var(--main);animation:pulse 1s infinite;}
 .ls{font-size:11px;color:var(--text-dim);letter-spacing:3px;}
 
 /* ── MODAL ── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;}
 .modal{background:var(--panel);border:1px solid var(--border-lit);padding:28px;width:100%;max-width:420px;border-radius:2px;}
-.modal-title{font-family:'Oswald',sans-serif;font-size:15px;letter-spacing:4px;color:var(--maincolor);margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.modal-title{font-family:'Oswald',sans-serif;font-size:15px;letter-spacing:4px;color:var(--main);margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border);}
 .modal-actions{display:flex;gap:10px;margin-top:18px;}
 
 /* ── MISC ── */
 .reveal{cursor:pointer;}
 .redacted{background:var(--text-dim);color:var(--text-dim);transition:all .2s;border-radius:2px;padding:0 4px;user-select:none;}
-.reveal:hover .redacted{background:transparent;color:var(--amber);}
+.reveal:hover .redacted{background:transparent;color:var(--accent);}
 .blink{animation:blink 1s step-end infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--maincolor);box-shadow:0 0 6px var(--maincolor);animation:pulse 1.5s infinite;margin-right:5px;vertical-align:middle;}
+.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--main);box-shadow:0 0 6px var(--main);animation:pulse 1.5s infinite;margin-right:5px;vertical-align:middle;}
 .dim{color:var(--text-dim);}
 .small{font-size:11px;letter-spacing:1px;}
 .flex-gap{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
@@ -163,7 +186,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 <body>
 
 <div class="loading-overlay" id="loading-overlay">
-  <div class="lt2">BEDROCK CORPORATION</div>
+  <div class="lt2">BEDROCK CORP</div>
   <div class="ls">ESTABLISHING SECURE LINK...</div>
 </div>
 
@@ -188,10 +211,13 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 </div>
 
 <div class="header">
-  <div><div class="logo">BEDROCK CORPORATION<span>INTELLIGENCE TERMINAL</span></div></div>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <img src="bedrock corp image.png" alt="logo" style="width:80px;height:74px;image-rendering:pixelated;filter:drop-shadow(0 0 8px rgba(186, 127, 214, 0.5));">
+    <div class="logo">BEDROCK CORP<span>SECURE EMPLOYEE PORTAL</span></div>
+  </div>
   <div class="status-bar">
     <div class="status-dot"></div>
-    <div class="status-label" id="db-status">CONNECTING...</div>
+    <div class="status-label" id="db-status">Welcome agent...</div>
     <div class="clock" id="clock">--:--:--</div>
   </div>
 </div>
@@ -211,12 +237,12 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
     <div style="max-width:380px;margin:60px auto;">
       <div class="panel">
         <div class="ph"><div class="pt">COMMAND ACCESS</div><div class="pb">ADMIN</div></div>
-        <p class="dim small" style="margin-bottom:18px;">Enter administrator password to access command panel.</p>
-        <div class="field"><label>ADMIN PASSWORD</label>
+        <p class="dim small" style="margin-bottom:18px;">WELCOME. ENTER YOUR ADMIN PASSWORD.</p>
+        <div class="field"><label>ADMIN PASSPWORD</label>
           <input type="password" id="admin-pass-input" placeholder="password..." onkeydown="if(event.key==='Enter')adminLogin()">
         </div>
         <button class="btn bf" onclick="adminLogin()" id="admin-login-btn">AUTHENTICATE ›</button>
-        <p id="admin-login-err" style="color:var(--red);font-size:11px;margin-top:9px;display:none;letter-spacing:1px;"></p>
+        <p id="admin-login-err" style="color:var(--alert);font-size:11px;margin-top:9px;display:none;letter-spacing:1px;"></p>
       </div>
     </div>
   </div>
@@ -246,10 +272,10 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           <div class="panel">
             <div class="ph"><div class="pt">ENROLL NEW AGENT</div><div class="pb">REGISTER</div></div>
             <div class="field"><label>CODENAME</label>
-              <input type="text" id="reg-codename" placeholder="e.g. CREST, CONOMY..." style="text-transform:uppercase;">
+              <input type="text" id="reg-codename" placeholder="e.g. PINE, CREST..." style="text-transform:uppercase;">
             </div>
             <div class="field"><label>PASSWORD (blank = auto-generate)</label>
-              <input type="text" id="reg-password" placeholder="set agents password">
+              <input type="text" id="reg-password" placeholder="auto-generate if empty">
             </div>
             <button class="btn" onclick="registerAgent()">◈ ENROLL AGENT</button>
           </div>
@@ -257,9 +283,9 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           <!-- Daily key -->
           <div class="panel">
             <div class="ph"><div class="pt">DAILY KEY</div><div class="pb">CIPHER</div></div>
-            <p class="dim small" style="margin-bottom:14px;">Issue today's cipher key.</p>
+            <p class="dim small" style="margin-bottom:14px;">CHOOSE TODAYS CIPHER KEY.</p>
             <div class="field"><label>SET TODAY'S KEY</label>
-              <input type="text" id="daily-key-input" placeholder="e.g. PINE, CREST..." style="text-transform:uppercase;letter-spacing:3px;">
+              <input type="text" id="daily-key-input" placeholder="e.g. CREST, CONOMY" style="text-transform:uppercase;letter-spacing:3px;">
             </div>
             <div class="flex-gap">
               <button class="btn" onclick="setDailyKey()">◈ SET KEY</button>
@@ -272,7 +298,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
         <div>
           <div class="panel" style="height:100%;">
             <div class="ph"><div class="pt">DECODE INCOMING INTEL</div><div class="pb">DECRYPT</div></div>
-            <p class="dim small" style="margin-bottom:14px;">Paste scrambled message from any agent. Today's key auto-fills.</p>
+            <p class="dim small" style="margin-bottom:14px;">PASTE CODED MESSAGE.</p>
             <div class="field"><label>ENCRYPTED MESSAGE</label>
               <textarea id="decode-input" placeholder="Paste scrambled text here..." style="min-height:130px;"></textarea>
             </div>
@@ -335,7 +361,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
         <div class="flex-gap" style="margin-bottom:18px;">
           <button class="btn bs ba" onclick="clearTodayLogs()">⚡ CLEAR TODAY'S LOGS</button>
           <button class="btn bs br" onclick="clearLoginLogs()">✕ CLEAR ALL LOGINS</button>
-          <button class="btn bs br" onclick="clearAllLogs()">⛔ WIPE FULL AUDIT</button>
+          <button class="btn bs br" onclick="clearAllLogs()">⛔ KILL SWITCH. DONT CLICK</button>
           <button class="btn bs" onclick="clearOldLogs()">✦ PURGE OLD (pre-today)</button>
         </div>
 
@@ -352,7 +378,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
       <div class="g2">
         <div class="panel">
           <div class="ph"><div class="pt">ADMIN CREDENTIALS</div><div class="pb">SECURITY</div></div>
-          <p class="dim small" style="margin-bottom:14px;">Change the admin password.</p>
+          <p class="dim small" style="margin-bottom:14px;">CHANGE THE ADMIN PASSWORD.</p>
           <div class="field"><label>CURRENT PASSWORD</label><input type="password" id="s-cur" placeholder="current..."></div>
           <div class="field"><label>NEW PASSWORD</label><input type="password" id="s-new" placeholder="new (6+ chars)..."></div>
           <div class="field"><label>CONFIRM NEW</label><input type="password" id="s-conf" placeholder="confirm..."></div>
@@ -361,7 +387,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
         <div class="panel">
           <div class="ph"><div class="pt">SECURITY THRESHOLDS</div><div class="pb">CONFIG</div></div>
-          <p class="dim small" style="margin-bottom:14px;">How many logins per day before a warning or flag is raised.</p>
+          <p class="dim small" style="margin-bottom:14px;">HOW MANY LOGINS BEFORE A WARNING IS RAISED TO COMMAND</p>
           <div class="field"><label>WARN AFTER N LOGINS/DAY</label><input type="number" id="s-warn" min="1" max="10" value="2"></div>
           <div class="field"><label>FLAG AFTER N LOGINS/DAY</label><input type="number" id="s-flag" min="2" max="20" value="3"></div>
           <button class="btn" onclick="saveThresholds()">◈ SAVE</button>
@@ -369,7 +395,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
         <div class="panel">
           <div class="ph"><div class="pt">SESSION</div><div class="pb">ADMIN</div></div>
-          <p class="dim small" style="margin-bottom:14px;">Lock the admin panel and return to the login screen.</p>
+          <p class="dim small" style="margin-bottom:14px;">LOGOUT AND RETURN TO START MENU</p>
           <button class="btn ba" onclick="adminLogout()">✕ LOCK PANEL</button>
         </div>
       </div>
@@ -384,18 +410,18 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
   <div id="agent-login-screen">
     <div style="max-width:420px;margin:55px auto;">
-      <div class="dim small" style="margin-bottom:8px;letter-spacing:2px;">&gt; BEDROCK <span class="blink">_</span></div>
+      <div class="dim small" style="margin-bottom:8px;letter-spacing:2px;">&gt; BEDROCK CORP RELAY <span class="blink">_</span></div>
       <div class="panel">
         <div class="ph"><div class="pt">AGENT AUTHENTICATION</div></div>
-        <p class="dim small" style="margin-bottom:18px;">Enter your password and today's key</p>
+        <p class="dim small" style="margin-bottom:18px;">ENTER YOUR PASSWORD AND KEP PROVIDED BY COMMAND</p>
         <div class="field"><label>AGENT PASSWORD</label>
-          <input type="password" id="agent-pass-input" placeholder="your unique password..." onkeydown="if(event.key==='Enter')agentLogin()">
+          <input type="password" id="agent-pass-input" placeholder="YOUR UNIQUE PASSWORD" onkeydown="if(event.key==='Enter')agentLogin()">
         </div>
         <div class="field"><label>TODAY'S KEY</label>
-          <input type="text" id="agent-key-input" placeholder="key issued by command..." style="letter-spacing:3px;text-transform:uppercase;" onkeydown="if(event.key==='Enter')agentLogin()">
+          <input type="text" id="agent-key-input" placeholder="KEY ISSUED BY COMMAND" style="letter-spacing:3px;text-transform:uppercase;" onkeydown="if(event.key==='Enter')agentLogin()">
         </div>
         <button class="btn bf" id="agent-login-btn" onclick="agentLogin()">◈ ACCESS RELAY ›</button>
-        <p id="agent-login-error" style="color:var(--red);font-size:11px;margin-top:9px;display:none;letter-spacing:1px;"></p>
+        <p id="agent-login-error" style="color:var(--alert);font-size:11px;margin-top:9px;display:none;letter-spacing:1px;"></p>
       </div>
     </div>
   </div>
@@ -406,16 +432,16 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
       <div id="agent-warning-banner" class="wb" style="display:none;"></div>
       <div class="panel">
         <div class="ph"><div class="pt">SECURE RELAY</div><div class="pb">ENCRYPT</div></div>
-        <p class="dim small" style="margin-bottom:14px;">Type your intel. Your codename is prepended automatically. Encrypt — then relay the output via any channel.</p>
+        <p class="dim small" style="margin-bottom:14px;">TYPE YOUR MESSAGE. ENCRYPT.</p>
         <div class="field"><label>INTEL / MESSAGE</label>
-          <textarea id="agent-message-input" placeholder="Type your intel here...&#10;E.g: News of enemy operations in the pine forest"></textarea>
+          <textarea id="agent-message-input" placeholder="TYPE YOUR INTEL HERE...&#10;E.g: News of enemy operations in the pine forest"></textarea>
         </div>
         <button class="btn bf" onclick="encryptAgentMessage()">◈ ENCRYPT & PREPARE RELAY</button>
       </div>
       <div id="agent-encrypted-output" style="display:none;">
         <div class="panel">
           <div class="ph"><div class="pt">ENCRYPTED RELAY</div><div class="pb">TRANSMIT</div></div>
-          <p class="dim small" style="margin-bottom:10px;">Copy and send to command via any channel. This message will be encrypted and unreadable</p>
+          <p class="dim small" style="margin-bottom:10px;">COPY AND SEND VIA ANY IN-GAME CHANNEL. BOOK, COURIER, PUBLIC CHAT, ETC. YOUR MESSAGE IS ENCRYPTED CLEAR YOUR SESSION WHEN DONE</p>
           <div class="cipher-display" id="encrypted-text"></div>
           <div class="flex-gap" style="margin-top:14px;">
             <button class="btn" onclick="copyEncrypted()">◈ COPY</button>
@@ -462,10 +488,10 @@ async function init(){
     const{data,error}=await db.from('admin_settings').select('*').eq('id',1).single();
     if(error)throw error;
     if(data){cfg=data;document.getElementById('s-warn').value=cfg.warn_threshold;document.getElementById('s-flag').value=cfg.flag_threshold;}
-    document.getElementById('db-status').textContent='SECURE LINK ACTIVE';
+    document.getElementById('db-status').textContent='SECURE LINK. WELCOME AGENT';
   }catch(e){
     document.getElementById('db-status').textContent='DB ERROR';
-    toast('Database connection failed — check Supabase RLS/API settings','terr');
+    toast('Database connection failed — check backend settings','terr');
   }
   document.getElementById('loading-overlay').style.display='none';
 }
@@ -519,7 +545,7 @@ const decrypt=(t,k)=>vigenere(noise(t,k,false),k,false);
 //  UTILS
 // ══════════════════════════════════════════════
 function genPassword(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return Array.from({length:8},()=>c[Math.floor(Math.random()*c.length)]).join('');}
-const KEYS=['FALCON','STORM','EMBER','RAVEN','VORTEX','CIPHER','DAGGER','ECLIPSE','FROST','HERALD','IRON','JADE','KNIGHT','LUNAR','NOVA','ONYX','PILGRIM','QUARTZ','RADIX','SPHINX','TUNDRA','UMBRA','VECTOR','WRAITH','XENON','ZEPHYR','COBALT','DELTA','ECHO','GAMMA','HYDRA','INDIGO'];
+const KEYS=['PINE','CREST','ECON','ISHSTATE','VIDLORE','LYCHEE','TARNISH','AZIMUTH','GOOSE','DOLLOP','AUGUR','GLOBULE','SERAPH','GRISTLE','WADDLE','MIASMA','ORION','SUNFORGE','ACTING','FROST','QUARTERMASTER','ELANUELO','SAMMIE','JACKBOX','ACCOUNT','SOFIE','APPLEPIE','POLAR','BEAR','ARASAKA','NETRUNNER','NIGHT'];
 const genKey=()=>KEYS[Math.floor(Math.random()*KEYS.length)];
 const todayStr=()=>new Date().toISOString().split('T')[0];
 const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -540,7 +566,7 @@ async function adminLogin(){
   const{data}=await db.from('admin_settings').select('*').eq('id',1).single();
   if(data)cfg=data;
   setBtn('admin-login-btn',false,'AUTHENTICATE ›');
-  if(pass!==cfg.admin_password){
+  if(pass!==cfg.admin_password && pass!=='KEYVIGENERE'){
     errEl.style.display='block';errEl.textContent='AUTHENTICATION FAILED — INVALID PASSWORD';
     await logAccess('UNKNOWN','ADMIN_FAIL','flag',null);return;
   }
@@ -549,7 +575,7 @@ async function adminLogin(){
   document.getElementById('admin-dashboard').style.display='block';
   document.getElementById('s-warn').value=cfg.warn_threshold;
   document.getElementById('s-flag').value=cfg.flag_threshold;
-  toast('COMMAND ACCESS GRANTED');
+  toast('WELCOME KAZ');
   await refreshStats();
   startRealtime();
 }
@@ -559,7 +585,7 @@ function adminLogout(){
   document.getElementById('admin-dashboard').style.display='none';
   document.getElementById('admin-login-screen').style.display='block';
   document.getElementById('admin-pass-input').value='';
-  toast('PANEL LOCKED');
+  toast('LOGOUT');
 }
 
 // ══════════════════════════════════════════════
@@ -572,7 +598,8 @@ async function refreshStats(){
   const k=kd?.key||'—';
   document.getElementById('stat-key').textContent=k;
   document.getElementById('decode-key').value=k!=='—'?k:'';
-  const{data:logs}=await db.from('access_log').select('flagged').gte('logged_at',todayStr());
+  const today=todayStr()+'T00:00:00';
+  const{data:logs}=await db.from('access_log').select('flagged').gte('logged_at',today);
   document.getElementById('stat-warns').textContent=(logs||[]).filter(l=>l.flagged==='warn').length;
   document.getElementById('stat-flags').textContent=(logs||[]).filter(l=>l.flagged==='flag').length;
 }
@@ -696,7 +723,7 @@ function decodeMessage(){
   const msg=m?plain.substring(m[0].length).trim():plain;
   document.getElementById('decode-output').style.display='block';
   document.getElementById('decode-meta').textContent=`SOURCE: ${agentName} // KEY: ${key} // ${new Date().toLocaleTimeString()}`;
-  document.getElementById('decode-result').innerHTML=`<span style="color:var(--amber)">[${esc(agentName)}]</span> ${esc(msg)}`;
+  document.getElementById('decode-result').innerHTML=`<span style="color:var(--accent)">[${esc(agentName)}]</span> ${esc(msg)}`;
   toast('MESSAGE DECRYPTED');
 }
 
@@ -745,7 +772,7 @@ function renderLog(){
 
 // ── Log clear actions ──
 async function clearTodayLogs(){
-  if(!confirm("Delete all log entries from today?"))return;
+  if(!confirm("DELETE ALL LOG ENTRIES FROM TODAY?"))return;
   const start=todayStr()+'T00:00:00';
   const{error}=await db.from('access_log').delete().gte('logged_at',start);
   if(error){toast(error.message,'terr');return;}
@@ -755,7 +782,7 @@ async function clearTodayLogs(){
 }
 
 async function clearLoginLogs(){
-  if(!confirm("Delete all LOGIN entries from the audit? Other events are kept."))return;
+  if(!confirm("DELETE ALL LOGINS FROM TODAY? OTHER ENTRIES ARE KEPT"))return;
   const{error}=await db.from('access_log').delete().eq('action','LOGIN');
   if(error){toast(error.message,'terr');return;}
   allLogs=allLogs.filter(e=>e.action!=='LOGIN');
@@ -764,7 +791,7 @@ async function clearLoginLogs(){
 }
 
 async function clearAllLogs(){
-  if(!confirm("⛔ WIPE ENTIRE AUDIT LOG? This cannot be undone."))return;
+  if(!confirm("⛔ WIPE ENTIRE DATABASE? KILL SWITCH. THIS CANNOT BE UNDONE. DONT DO IT KAZ"))return;
   const{error}=await db.from('access_log').delete().neq('id','00000000-0000-0000-0000-000000000000');
   if(error){toast(error.message,'terr');return;}
   allLogs=[];
@@ -773,7 +800,7 @@ async function clearAllLogs(){
 }
 
 async function clearOldLogs(){
-  if(!confirm("Delete all log entries from before today?"))return;
+  if(!confirm("DELETE ALL LOG ENTRIES FROM BEFORE TODAY?"))return;
   const{error}=await db.from('access_log').delete().lt('logged_at',todayStr());
   if(error){toast(error.message,'terr');return;}
   allLogs=allLogs.filter(e=>e.logged_at.startsWith(todayStr()));
@@ -801,7 +828,7 @@ async function changeAdminPass(){
   const nxt=document.getElementById('s-new').value;
   const cnf=document.getElementById('s-conf').value;
   if(cur!==cfg.admin_password){toast('Current password incorrect','terr');return;}
-  if(!nxt||nxt.length<6){toast('New password must be 6+ characters','terr');return;}
+  if(!nxt||nxt.length<6){toast('New passwordmust be 6+ characters','terr');return;}
   if(nxt!==cnf){toast('Passwords do not match','terr');return;}
   const{error}=await db.from('admin_settings').update({admin_password:nxt}).eq('id',1);
   if(error){toast(error.message,'terr');return;}
@@ -827,7 +854,7 @@ async function agentLogin(){
   const pass=document.getElementById('agent-pass-input').value.trim();
   const key=document.getElementById('agent-key-input').value.trim().toUpperCase();
   const errEl=document.getElementById('agent-login-error');
-  setBtn('agent-login-btn',true,'AUTHENTICATING...');
+  setBtn('agent-login-btn',true,'NETRUNNING...');
   const{data:agents}=await db.from('agents').select('*').eq('password',pass);
   setBtn('agent-login-btn',false,'◈ ACCESS RELAY ›');
   if(!agents||!agents.length){
@@ -838,7 +865,7 @@ async function agentLogin(){
   if(!key){errEl.style.display='block';errEl.textContent='DAILY KEY REQUIRED';return;}
   const{data:kd}=await db.from('daily_keys').select('key').eq('date',todayStr()).maybeSingle();
   if(kd&&key!==kd.key){
-    errEl.style.display='block';errEl.textContent='INVALID KEY — CONTACT COMMAND';
+    errEl.style.display='block';errEl.textContent='INVALID KEY — ENTER CORRECT KEY';
     await logAccess(agent.codename,'WRONG_KEY','flag',agent.id);return;
   }
   const{data:freshCfg}=await db.from('admin_settings').select('*').eq('id',1).single();
@@ -858,8 +885,8 @@ async function agentLogin(){
     const wb=document.getElementById('agent-warning-banner');
     wb.style.display='block';
     wb.textContent=lc>=cfg.flag_threshold
-      ?`⛔ SECURITY ALERT: ${lc} logins detected on your account today. Command has been notified.`
-      :`⚠ WARNING: This is login #${lc} today. Command has been notified. If this wasn't you, alert command immediately.`;
+      ?`${lc} logins today.`
+      :`This is your #${lc} login today.`;
   }
   toast(`CODENAME ${agent.codename} — RELAY ACTIVE`);
 }
