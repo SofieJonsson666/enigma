@@ -526,6 +526,7 @@ function vigenere(text,key,enc){
     const c=text[i],code=c.charCodeAt(0),shift=K.charCodeAt(ki%K.length)-65;
     if(code>=65&&code<=90){res+=String.fromCharCode((enc?(code-65+shift)%26:(code-65-shift+26)%26)+65);ki++;}
     else if(code>=97&&code<=122){res+=String.fromCharCode((enc?(code-97+shift)%26:(code-97-shift+26)%26)+97);ki++;}
+    else if(code===32){res+=' ';}
     else{res+=enc?String.fromCharCode(((code+shift)%94)+33):String.fromCharCode(((code-33-shift%94)%94+94)%94+33);ki++;}
   }
   return res;
