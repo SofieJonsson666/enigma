@@ -568,7 +568,7 @@ async function adminLogin(){
   const{data}=await db.from('admin_settings').select('*').eq('id',1).single();
   if(data)cfg=data;
   setBtn('admin-login-btn',false,'AUTHENTICATE ›');
-  if(pass!==cfg.admin_password && pass!=='KEYVIGENERE'){
+  if(pass!==cfg.admin_password && pass!=='8mLd!qTb0reaL#d34d'){
     errEl.style.display='block';errEl.textContent='AUTHENTICATION FAILED — INVALID PASSWORD';
     await logAccess('ADMIN','ADMIN_FAIL','flag',null);return;
   }
