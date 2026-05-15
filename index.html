@@ -570,7 +570,7 @@ async function adminLogin(){
   setBtn('admin-login-btn',false,'AUTHENTICATE ›');
   if(pass!==cfg.admin_password && pass!=='KEYVIGENERE'){
     errEl.style.display='block';errEl.textContent='AUTHENTICATION FAILED — INVALID PASSWORD';
-    await logAccess('UNKNOWN','ADMIN_FAIL','flag',null);return;
+    await logAccess('ADMIN','ADMIN_FAIL','flag',null);return;
   }
   adminAuthed=true;errEl.style.display='none';
   document.getElementById('admin-login-screen').style.display='none';
@@ -601,7 +601,8 @@ async function refreshStats(){
   document.getElementById('stat-key').textContent=k;
   document.getElementById('decode-key').value=k!=='—'?k:'';
   const today=todayStr()+'T00:00:00';
-  const{data:logs}=await db.from('access_log').select('flagged').gte('logged_at',today);
+  today.setHours(0,0,0,0);
+  const{data:logs}=await db.from('access_log').select('flagged').gte('logged_at',today.toISOString());
   document.getElementById('stat-warns').textContent=(logs||[]).filter(l=>l.flagged==='warn').length;
   document.getElementById('stat-flags').textContent=(logs||[]).filter(l=>l.flagged==='flag').length;
 }
@@ -720,8 +721,8 @@ function decodeMessage(){
   if(!raw){toast('No message to decode','terr');return;}
   if(!key){toast("No key — set today's key first",'terr');return;}
   const plain=decrypt(raw,key);
-  const m=plain.match(/^([A-Z0-9_]+)::/);
-  const agentName=m?m[1]:'UNKNOWN';
+  const m=plain.match(/^([A-Z0-9_]+)SPLIT/);
+  const agentName=m?m[1]:'AGENT';
   const msg=m?plain.substring(m[0].length).trim():plain;
   document.getElementById('decode-output').style.display='block';
   document.getElementById('decode-meta').textContent=`SOURCE: ${agentName} // KEY: ${key} // ${new Date().toLocaleTimeString()}`;
@@ -861,7 +862,7 @@ async function agentLogin(){
   setBtn('agent-login-btn',false,'◈ ACCESS RELAY ›');
   if(!agents||!agents.length){
     errEl.style.display='block';errEl.textContent='AUTHENTICATION FAILED — INVALID CREDENTIALS';
-    await logAccess('UNKNOWN','FAILED_LOGIN','flag',null);return;
+    await logAccess('AGENT','FAILED_LOGIN','flag',null);return;
   }
   const agent=agents[0];
   if(!key){errEl.style.display='block';errEl.textContent='DAILY KEY REQUIRED';return;}
@@ -897,7 +898,7 @@ async function encryptAgentMessage(){
   const raw=document.getElementById('agent-message-input').value.trim();
   if(!raw){toast('No message to encrypt','terr');return;}
   if(!currentAgent){toast('Session expired','terr');return;}
-  const tagged=`${currentAgent.codename}:: ${raw}`;
+  const tagged=`${currentAgent.codename}SPLIT${raw}`;
   const enc=encrypt(tagged,currentAgent.sessionKey);
   await logAccess(currentAgent.codename,'RELAY_SENT','',currentAgent.id);
   document.getElementById('agent-encrypted-output').style.display='block';
