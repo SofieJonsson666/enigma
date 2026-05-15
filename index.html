@@ -565,21 +565,36 @@ async function adminLogin(){
   const pass=document.getElementById('admin-pass-input').value;
   const errEl=document.getElementById('admin-login-err');
   setBtn('admin-login-btn',true,'AUTHENTICATING...');
-  const{data}=await db.from('admin_settings').select('*').eq('id',1).single();
-  if(data)cfg=data;
-  setBtn('admin-login-btn',false,'AUTHENTICATE ›');
-  if(pass!==cfg.admin_password && pass!=='8mLd!qTb0reaL#d34d'){
-    errEl.style.display='block';errEl.textContent='AUTHENTICATION FAILED — INVALID PASSWORD';
-    await logAccess('ADMIN','ADMIN_FAIL','flag',null);return;
+
+  try {
+    const res = await fetch('https://nzqqbigzuxdqyjszpnpy.supabase.co/functions/v1/admin-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pass })
+    });
+    const data = await res.json();
+    setBtn('admin-login-btn',false,'AUTHENTICATE ›');
+
+    if(data.success){
+      adminAuthed=true;
+      errEl.style.display='none';
+      document.getElementById('admin-login-screen').style.display='none';
+      document.getElementById('admin-dashboard').style.display='block';
+      document.getElementById('s-warn').value=cfg.warn_threshold;
+      document.getElementById('s-flag').value=cfg.flag_threshold;
+      toast('WELCOME KAZ');
+      await refreshStats();
+      startRealtime();
+    } else {
+      errEl.style.display='block';
+      errEl.textContent='AUTHENTICATION FAILED — INVALID PASSPHRASE';
+      await logAccess('UNKNOWN','ADMIN_FAIL','flag',null);
+    }
+  } catch(e) {
+    setBtn('admin-login-btn',false,'AUTHENTICATE ›');
+    errEl.style.display='block';
+    errEl.textContent='CONNECTION ERROR — TRY AGAIN';
   }
-  adminAuthed=true;errEl.style.display='none';
-  document.getElementById('admin-login-screen').style.display='none';
-  document.getElementById('admin-dashboard').style.display='block';
-  document.getElementById('s-warn').value=cfg.warn_threshold;
-  document.getElementById('s-flag').value=cfg.flag_threshold;
-  toast('WELCOME KAZ');
-  await refreshStats();
-  startRealtime();
 }
 function adminLogout(){
   adminAuthed=false;
