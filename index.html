@@ -569,7 +569,10 @@ async function adminLogin(){
   try {
     const res = await fetch('https://nzqqbigzuxdqyjszpnpy.supabase.co/functions/v1/admin-auth', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56cXFiaWd6dXhkcXlqc3pwbnB5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1OTIwNjYsImV4cCI6MjA5NDE2ODA2Nn0.87RRIFXvn34Au_denSm5W_XvIaxcwr6gMmSYXC_BOGc`
+      },
       body: JSON.stringify({ password: pass })
     });
     const data = await res.json();
