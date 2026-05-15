@@ -535,6 +535,7 @@ function noise(text,key,enc){
   const K=key.toUpperCase().replace(/[^A-Z]/g,'')||'A';
   return text.split('').map((c,i)=>{
     const code=c.charCodeAt(0);
+    if(code===32)return ' ';
     if(code>=33&&code<=126){const s=K.charCodeAt((i*3)%K.length)%10;return String.fromCharCode(enc?((code-33+s)%94)+33:((code-33-s+94)%94)+33);}
     return c;
   }).join('');
@@ -719,7 +720,7 @@ function decodeMessage(){
   if(!raw){toast('No message to decode','terr');return;}
   if(!key){toast("No key — set today's key first",'terr');return;}
   const plain=decrypt(raw,key);
-  const m=plain.match(/^\[([A-Z0-9_]+)\]/);
+  const m=plain.match(/^([A-Z0-9_]+)::/);
   const agentName=m?m[1]:'UNKNOWN';
   const msg=m?plain.substring(m[0].length).trim():plain;
   document.getElementById('decode-output').style.display='block';
@@ -896,7 +897,7 @@ async function encryptAgentMessage(){
   const raw=document.getElementById('agent-message-input').value.trim();
   if(!raw){toast('No message to encrypt','terr');return;}
   if(!currentAgent){toast('Session expired','terr');return;}
-  const tagged=`[${currentAgent.codename}] ${raw}`;
+  const tagged=`${currentAgent.codename}:: ${raw}`;
   const enc=encrypt(tagged,currentAgent.sessionKey);
   await logAccess(currentAgent.codename,'RELAY_SENT','',currentAgent.id);
   document.getElementById('agent-encrypted-output').style.display='block';
