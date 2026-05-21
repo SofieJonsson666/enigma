@@ -6,182 +6,12 @@
 <title>BEDROCK CORP PORTAL</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Oswald:wght@300;400;600&family=Space+Mono:wght@400;700&family=Press+Start+2P&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+
+<!-- Supabase library -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-:root{
-  --main:#e9f7f8;--main-dim:#adecf5;--main-dark:#1a0800;
-  --accent:#ffdd00;--accent-dim:#ccaa00;
-  --alert:#cc44ff;--alert-dim:#8822cc;
-  --bg:#100b12;--bg2:#150e19;--panel:#1b1220;
-  --border:#7a4db4;--border-lit:#d08ed6;
-  --text:#5dd6f1;--text-dim:#44a5ff;--text-muted:#265e7e;
-}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;font-size: 16px;min-height:100vh;overflow-x:hidden;background-image:url('bedrockbg.png');background-size:cover;background-position:center;background-attachment:fixed;background-repeat:no-repeat;}
-body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.30) 0px,transparent 1px,transparent 3px);pointer-events:none;z-index:9999;}
 
-/* ── HEADER ── */
-.header{border-bottom:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;background:var(--bg2);}
-.logo{
-  font-family:'Share Tech Mono',monospace;
-  font-weight: 600;
-  font-size:22px;
-  letter-spacing:8px;
-  color:#ffffff;
-  text-shadow:
-    -1px 0 1px rgba(255,0,0,.5),
-     1px 0 1px rgba(0,255,255,.5),
-     0 0 8px rgba(255,255,255,.3);
-  animation: flicker-logo 6s infinite;
-}
-
-@keyframes flicker-logo {
-  0%   { opacity: 1; }
-  92%  { opacity: 1; }
-  93%  { opacity: 0.4; }
-  94%  { opacity: 1; }
-  96%  { opacity: 0.6; }
-  97%  { opacity: 1; }
-  98%  { opacity: 0.3; }
-  99%  { opacity: 1; }
-  100% { opacity: 1; }
-}
-.logo span{color:var(--text-dim);font-weight:300;font-size:11px;letter-spacing:4px;display:block;margin-top:2px;}
-.status-bar{display:flex;gap:20px;align-items:center;}
-.status-dot{width:7px;height:7px;border-radius:50%;background:var(--main);box-shadow:0 0 7px var(--main);animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.status-label{font-size:11px;color:var(--text-dim);letter-spacing:2px;}
-.clock{font-size:12px;color:var(--main-dim);letter-spacing:2px;}
-
-/* ── NAV ── */
-.nav{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 32px;}
-.nav-btn{background:none;border:none;cursor:pointer;padding:13px 22px;font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:3px;color:var(--text-dim);border-bottom:2px solid transparent;transition:all .2s;}
-.nav-btn:hover{color:var(--text);}
-.nav-btn.active{color:var(--main);border-bottom-color:var(--main);}
-
-.main{padding:28px 32px;max-width:1400px;margin:0 auto;}
-
-/* ── PANELS ── */
-.panel{background:var(--panel);border:1px solid var(--border);border-radius:2px;padding:22px;margin-bottom:18px;}
-.ph{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:13px;border-bottom:1px solid var(--border);}
-.pt{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:4px;color:var(--main);}
-.pb{font-size:10px;padding:2px 8px;border:1px solid var(--border-lit);color:var(--text-dim);letter-spacing:2px;}
-
-/* ── FORMS ── */
-.field{margin-bottom:14px;}
-.field label{display:block;font-size:11px;letter-spacing:2px;color:var(--text-dim);margin-bottom:5px;}
-.field input,.field textarea,.field select{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:13px;padding:9px 12px;outline:none;transition:border-color .2s;border-radius:1px;}
-.field input:focus,.field textarea:focus{border-color:var(--main-dim);box-shadow:0 0 0 1px rgba(255,102,0,.08);}
-.field textarea{resize:vertical;min-height:90px;line-height:1.6;}
-
-/* ── BUTTONS ── */
-.btn{display:inline-flex;align-items:center;gap:7px;background:none;border:1px solid var(--main-dim);color:var(--main);font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:3px;padding:9px 20px;cursor:pointer;transition:all .2s;border-radius:1px;}
-.btn:hover{background:rgba(100, 133, 240, 0.07);box-shadow:0 0 10px rgba(102, 184, 240, 0.12);}
-.btn:active{transform:scale(.98);}
-.btn:disabled{opacity:.4;cursor:not-allowed;}
-.btn.ba{border-color:var(--accent-dim);color:var(--accent);}
-.btn.ba:hover{background:rgba(255,221,0,.07);}
-.btn.br{border-color:var(--alert-dim);color:var(--alert);}
-.btn.br:hover{background:rgba(204,68,255,.07);}
-.btn.bf{width:100%;justify-content:center;}
-.btn.bs{padding:5px 10px;font-size:10px;letter-spacing:2px;}
-
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
-
-/* ── STATS ── */
-.stat-row{display:flex;gap:14px;margin-bottom:18px;}
-.sc{flex:1;background:var(--bg);border:1px solid var(--border);padding:14px 18px;}
-.sn{font-family:'Oswald',sans-serif;font-size:30px;color:var(--main);line-height:1;}
-.sl{font-size:10px;letter-spacing:2px;color:var(--text-dim);margin-top:3px;}
-.sc.sw .sn{color:var(--accent);}
-.sc.sd .sn{color:var(--alert);}
-
-/* ── TABS ── */
-.tab-row{display:flex;border-bottom:1px solid var(--border);margin-bottom:18px;}
-.tab-btn{background:none;border:none;cursor:pointer;padding:9px 18px;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;color:var(--text-dim);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;}
-.tab-btn:hover{color:var(--text);}
-.tab-btn.active{color:var(--main);border-bottom-color:var(--main);}
-.tab-content{display:none;}
-.tab-content.active{display:block;}
-
-/* ── AGENT TABLE ── */
-.agent-table{width:100%;border-collapse:collapse;}
-.agent-table th{text-align:left;font-size:10px;letter-spacing:3px;color:var(--text-muted);padding:7px 10px;border-bottom:1px solid var(--border);font-weight:400;}
-.agent-table td{padding:10px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle;}
-.agent-table tr:hover td{background:rgba(255,102,0,.02);}
-.cn{color:var(--main);font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:3px;}
-.aok{color:var(--main-dim);font-size:11px;}
-.awk{color:var(--accent);font-size:11px;}
-.afg{color:var(--alert);font-size:11px;animation:flicker 1s infinite;}
-@keyframes flicker{0%,100%{opacity:1}50%{opacity:.55}}
-
-/* inline edit inputs inside table */
-.edit-input{background:var(--bg);border:1px solid var(--border-lit);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:12px;padding:5px 8px;outline:none;border-radius:1px;width:100%;}
-.edit-input:focus{border-color:var(--main-dim);}
-.edit-row td{background:rgba(255,102,0,.04)!important;}
-
-/* ── LOG ── */
-.log-list{list-style:none;}
-.log-entry{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:11px;}
-.lt{color:var(--text-muted);min-width:105px;}
-.la{color:var(--main);min-width:100px;letter-spacing:2px;}
-.lm{color:var(--text-dim);flex:1;}
-.lfw{color:var(--accent);font-size:10px;letter-spacing:1px;}
-.lff{color:var(--alert);font-size:10px;letter-spacing:1px;animation:flicker 1s infinite;}
-
-/* ── DECODE ── */
-.decode-result{background:var(--bg);border:1px solid var(--border-lit);padding:14px;margin-top:14px;font-size:13px;line-height:1.8;color:var(--main);letter-spacing:1px;min-height:50px;}
-.decode-meta{font-size:11px;color:var(--text-dim);margin-bottom:7px;letter-spacing:1px;}
-
-/* ── CIPHER ── */
-.cipher-display{background:var(--bg);border:1px solid var(--border);padding:14px;font-size:11px;letter-spacing:2px;color:var(--text-dim);word-break:break-all;line-height:2;font-family:'Space Mono',monospace;}
-
-/* ── TOAST ── */
-.toast{position:fixed;bottom:28px;right:28px;background:var(--bg2);border:1px solid var(--border-lit);padding:12px 20px;font-size:11px;letter-spacing:2px;color:var(--main);z-index:10000;transform:translateY(70px);opacity:0;transition:all .3s;max-width:340px;line-height:1.5;}
-.toast.show{transform:translateY(0);opacity:1;}
-.toast.terr{border-color:var(--alert-dim);color:var(--alert);}
-.toast.twrn{border-color:var(--accent-dim);color:var(--accent);}
-
-/* ── VIEWS ── */
-.view{display:none;}
-.view.active{display:block;}
-
-/* ── BANNERS ── */
-.wb{background:rgba(204,68,255,.09);border:1px solid var(--alert-dim);padding:9px 14px;font-size:11px;color:var(--alert);letter-spacing:1px;margin-bottom:14px;}
-.sb{background:rgba(255,102,0,.06);border:1px solid var(--border-lit);padding:9px 14px;font-size:11px;color:var(--main);letter-spacing:1px;margin-bottom:14px;}
-
-/* ── LOADING ── */
-.loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;gap:18px;}
-.lt2{font-family:'Oswald',sans-serif;letter-spacing:6px;font-size:20px;color:var(--main);animation:pulse 1s infinite;}
-.ls{font-size:11px;color:var(--text-dim);letter-spacing:3px;}
-
-/* ── MODAL ── */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;}
-.modal{background:var(--panel);border:1px solid var(--border-lit);padding:28px;width:100%;max-width:420px;border-radius:2px;}
-.modal-title{font-family:'Oswald',sans-serif;font-size:15px;letter-spacing:4px;color:var(--main);margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border);}
-.modal-actions{display:flex;gap:10px;margin-top:18px;}
-
-/* ── MISC ── */
-.reveal{cursor:pointer;}
-.redacted{background:var(--text-dim);color:var(--text-dim);transition:all .2s;border-radius:2px;padding:0 4px;user-select:none;}
-.reveal:hover .redacted{background:transparent;color:var(--accent);}
-.blink{animation:blink 1s step-end infinite;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--main);box-shadow:0 0 6px var(--main);animation:pulse 1.5s infinite;margin-right:5px;vertical-align:middle;}
-.dim{color:var(--text-dim);}
-.small{font-size:11px;letter-spacing:1px;}
-.flex-gap{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
-.section-label{font-size:10px;letter-spacing:3px;color:var(--text-muted);margin-bottom:10px;margin-top:18px;}
-.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
-
-@media(max-width:800px){
-  .g2{grid-template-columns:1fr;}
-  .main{padding:14px;}
-  .header{padding:14px;}
-  .stat-row{flex-wrap:wrap;}
-  .sc{min-width:calc(50% - 7px);}
-}
-</style>
+<!-- Styles -->
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -212,7 +42,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
 <div class="header">
   <div style="display:flex;align-items:center;gap:16px;">
-    <img src="bedrock corp image.png" alt="logo" style="width:80px;height:74px;image-rendering:pixelated;filter:drop-shadow(0 0 8px rgba(186, 127, 214, 0.5));">
+    <img src="bedrock corp image.png" alt="logo" style="width:80px;height:74px;image-rendering:pixelated;filter:drop-shadow(0 0 8px rgba(186,127,214,0.5));">
     <div class="logo">BEDROCK CORP<span>SECURE EMPLOYEE PORTAL</span></div>
   </div>
   <div class="status-bar">
@@ -238,7 +68,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
       <div class="panel">
         <div class="ph"><div class="pt">COMMAND ACCESS</div><div class="pb">ADMIN</div></div>
         <p class="dim small" style="margin-bottom:18px;">WELCOME. ENTER YOUR ADMIN PASSWORD.</p>
-        <div class="field"><label>ADMIN PASSPWORD</label>
+        <div class="field"><label>ADMIN PASSWORD</label>
           <input type="password" id="admin-pass-input" placeholder="password..." onkeydown="if(event.key==='Enter')adminLogin()">
         </div>
         <button class="btn bf" onclick="adminLogin()" id="admin-login-btn">AUTHENTICATE ›</button>
@@ -264,11 +94,10 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
       <button class="tab-btn" id="tbtn-settings" onclick="adminTab('settings',this)">SETTINGS</button>
     </div>
 
-    <!-- ── OPERATIONS ── -->
+    <!-- OPERATIONS TAB -->
     <div class="tab-content active" id="tab-ops">
       <div class="g2">
         <div>
-          <!-- Quick enroll -->
           <div class="panel">
             <div class="ph"><div class="pt">ENROLL NEW AGENT</div><div class="pb">REGISTER</div></div>
             <div class="field"><label>CODENAME</label>
@@ -280,7 +109,6 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
             <button class="btn" onclick="registerAgent()">◈ ENROLL AGENT</button>
           </div>
 
-          <!-- Daily key -->
           <div class="panel">
             <div class="ph"><div class="pt">DAILY KEY</div><div class="pb">CIPHER</div></div>
             <p class="dim small" style="margin-bottom:14px;">CHOOSE TODAYS CIPHER KEY.</p>
@@ -294,7 +122,6 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           </div>
         </div>
 
-        <!-- Decode -->
         <div>
           <div class="panel" style="height:100%;">
             <div class="ph"><div class="pt">DECODE INCOMING INTEL</div><div class="pb">DECRYPT</div></div>
@@ -315,7 +142,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
       </div>
     </div>
 
-    <!-- ── AGENTS ── -->
+    <!-- AGENTS TAB -->
     <div class="tab-content" id="tab-agents">
       <div class="panel">
         <div class="ph">
@@ -338,25 +165,20 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
       </div>
     </div>
 
-    <!-- ── SURVEILLANCE ── -->
+    <!-- SURVEILLANCE TAB -->
     <div class="tab-content" id="tab-log">
       <div class="panel">
         <div class="ph">
           <div class="pt"><span class="live-dot"></span>LIVE SURVEILLANCE</div>
           <div class="pb">REAL-TIME</div>
         </div>
-
-        <!-- Filter row -->
         <div class="flex-gap" style="margin-bottom:14px;">
           <button class="btn bs" onclick="filterLog('all')" id="flt-all">ALL</button>
           <button class="btn bs ba" onclick="filterLog('warn')" id="flt-warn">WARNINGS</button>
           <button class="btn bs br" onclick="filterLog('flag')" id="flt-flag">FLAGS</button>
           <button class="btn bs" onclick="filterLog('today')" id="flt-today">TODAY</button>
         </div>
-
         <hr class="divider">
-
-        <!-- Clear controls -->
         <div class="section-label">CLEAR LOG ENTRIES</div>
         <div class="flex-gap" style="margin-bottom:18px;">
           <button class="btn bs ba" onclick="clearTodayLogs()">⚡ CLEAR TODAY'S LOGS</button>
@@ -364,16 +186,14 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           <button class="btn bs br" onclick="clearAllLogs()">⛔ KILL SWITCH. DONT CLICK</button>
           <button class="btn bs" onclick="clearOldLogs()">✦ PURGE OLD (pre-today)</button>
         </div>
-
         <hr class="divider">
-
         <div id="log-loading" class="dim small">Loading access log...</div>
         <div id="log-empty" class="dim small" style="display:none;">No entries match this filter.</div>
         <ul class="log-list" id="access-log-list"></ul>
       </div>
     </div>
 
-    <!-- ── SETTINGS ── -->
+    <!-- SETTINGS TAB -->
     <div class="tab-content" id="tab-settings">
       <div class="g2">
         <div class="panel">
@@ -384,7 +204,6 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           <div class="field"><label>NOT IN TIME FOR THE EVENT</label><input type="password" id="s-conf" placeholder="confirm..."></div>
           <button class="btn" onclick="changeAdminPass()">◈ NAH BRO</button>
         </div>
-
         <div class="panel">
           <div class="ph"><div class="pt">SECURITY THRESHOLDS</div><div class="pb">CONFIG</div></div>
           <p class="dim small" style="margin-bottom:14px;">HOW MANY LOGINS BEFORE A WARNING IS RAISED TO COMMAND</p>
@@ -392,7 +211,6 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           <div class="field"><label>FLAG AFTER N LOGINS/DAY</label><input type="number" id="s-flag" min="2" max="20" value="3"></div>
           <button class="btn" onclick="saveThresholds()">◈ SAVE</button>
         </div>
-
         <div class="panel">
           <div class="ph"><div class="pt">SESSION</div><div class="pb">ADMIN</div></div>
           <p class="dim small" style="margin-bottom:14px;">LOGOUT AND RETURN TO START MENU</p>
@@ -441,7 +259,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
       <div id="agent-encrypted-output" style="display:none;">
         <div class="panel">
           <div class="ph"><div class="pt">ENCRYPTED RELAY</div><div class="pb">TRANSMIT</div></div>
-          <p class="dim small" style="margin-bottom:10px;">COPY AND SEND VIA ANY IN-GAME CHANNEL. BOOK, COURIER, PUBLIC CHAT, ETC. YOUR MESSAGE IS ENCRYPTED CLEAR YOUR SESSION WHEN DONE</p>
+          <p class="dim small" style="margin-bottom:10px;">COPY AND SEND VIA ANY IN-GAME CHANNEL. BOOK, COURIER, PUBLIC CHAT, ETC. YOUR MESSAGE IS ENCRYPTED. CLEAR YOUR SESSION WHEN DONE.</p>
           <div class="cipher-display" id="encrypted-text"></div>
           <div class="flex-gap" style="margin-top:14px;">
             <button class="btn" onclick="copyEncrypted()">◈ COPY</button>
@@ -457,489 +275,10 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
 <div class="toast" id="toast"></div>
 
-<script>
-// ══════════════════════════════════════════════
-//  SUPABASE
-// ══════════════════════════════════════════════
-const SUPA_URL='https://nzqqbigzuxdqyjszpnpy.supabase.co';
-const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56cXFiaWd6dXhkcXlqc3pwbnB5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1OTIwNjYsImV4cCI6MjA5NDE2ODA2Nn0.87RRIFXvn34Au_denSm5W_XvIaxcwr6gMmSYXC_BOGc';
-const db=supabase.createClient(SUPA_URL,SUPA_KEY);
+<!-- Scripts: load order matters — supabase config first, then app logic -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="app.js"></script>
 
-// ══════════════════════════════════════════════
-//  STATE
-// ══════════════════════════════════════════════
-let adminAuthed=false, currentAgent=null;
-let cfg={admin_password:'admin1234',warn_threshold:2,flag_threshold:3};
-let allLogs=[], logFilter='all', realtimeSub=null;
-
-// ══════════════════════════════════════════════
-//  CLOCK
-// ══════════════════════════════════════════════
-setInterval(()=>{
-  document.getElementById('clock').textContent=
-    new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-},1000);
-
-// ══════════════════════════════════════════════
-//  INIT
-// ══════════════════════════════════════════════
-async function init(){
-  try{
-    const{data,error}=await db.from('admin_settings').select('*').eq('id',1).single();
-    if(error)throw error;
-    if(data){cfg=data;document.getElementById('s-warn').value=cfg.warn_threshold;document.getElementById('s-flag').value=cfg.flag_threshold;}
-    document.getElementById('db-status').textContent='SECURE LINK. WELCOME AGENT';
-  }catch(e){
-    document.getElementById('db-status').textContent='DB ERROR';
-    toast('Database connection failed — check backend settings','terr');
-  }
-  document.getElementById('loading-overlay').style.display='none';
-}
-window.addEventListener('load',init);
-
-// ══════════════════════════════════════════════
-//  NAVIGATION
-// ══════════════════════════════════════════════
-function showView(v){
-  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));
-  document.getElementById('view-'+v).classList.add('active');
-  document.getElementById('nav-'+v).classList.add('active');
-}
-function adminTab(name,btn){
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
-  if(btn)btn.classList.add('active');
-  if(name==='agents')loadRoster();
-  if(name==='log')loadAccessLog();
-}
-
-// ══════════════════════════════════════════════
-//  CIPHER
-// ══════════════════════════════════════════════
-function vigenere(text,key,enc){
-  const K=key.toUpperCase().replace(/[^A-Z]/g,'');
-  if(!K.length)return text;
-  let res='',ki=0;
-  for(let i=0;i<text.length;i++){
-    const c=text[i],code=c.charCodeAt(0),shift=K.charCodeAt(ki%K.length)-65;
-    if(code>=65&&code<=90){res+=String.fromCharCode((enc?(code-65+shift)%26:(code-65-shift+26)%26)+65);ki++;}
-    else if(code>=97&&code<=122){res+=String.fromCharCode((enc?(code-97+shift)%26:(code-97-shift+26)%26)+97);ki++;}
-    else if(code===32){res+=' ';}
-    else{res+=enc?String.fromCharCode(((code+shift)%94)+33):String.fromCharCode(((code-33-shift%94)%94+94)%94+33);ki++;}
-  }
-  return res;
-}
-function noise(text,key,enc){
-  const K=key.toUpperCase().replace(/[^A-Z]/g,'')||'A';
-  return text.split('').map((c,i)=>{
-    const code=c.charCodeAt(0);
-    if(code===32)return ' ';
-    if(code>=33&&code<=126){const s=K.charCodeAt((i*3)%K.length)%10;return String.fromCharCode(enc?((code-33+s)%94)+33:((code-33-s+94)%94)+33);}
-    return c;
-  }).join('');
-}
-const encrypt=(t,k)=>noise(vigenere(t,k,true),k,true);
-const decrypt=(t,k)=>vigenere(noise(t,k,false),k,false);
-
-// ══════════════════════════════════════════════
-//  UTILS
-// ══════════════════════════════════════════════
-function genPassword(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return Array.from({length:8},()=>c[Math.floor(Math.random()*c.length)]).join('');}
-const KEYS=['PINE','CREST','ECON','ISHSTATE','VIDLORE','LYCHEE','TARNISH','AZIMUTH','GOOSE','DOLLOP','AUGUR','GLOBULE','SERAPH','GRISTLE','WADDLE','MIASMA','ORION','SUNFORGE','ACTING','FROST','QUARTERMASTER','ELANUELO','SAMMIE','JACKBOX','ACCOUNT','SOFIE','APPLEPIE','POLAR','BEAR','ARASAKA','NETRUNNER','NIGHT'];
-const genKey=()=>KEYS[Math.floor(Math.random()*KEYS.length)];
-const todayStr=()=>new Date().toISOString().split('T')[0];
-const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-function toast(msg,cls=''){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.className='toast show'+(cls?' '+cls:'');
-  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),4000);
-}
-function setBtn(id,dis,txt){const b=document.getElementById(id);if(!b)return;b.disabled=dis;if(txt)b.textContent=txt;}
-
-// ══════════════════════════════════════════════
-//  ADMIN AUTH
-// ══════════════════════════════════════════════
-async function adminLogin(){
-  const pass=document.getElementById('admin-pass-input').value;
-  const errEl=document.getElementById('admin-login-err');
-  setBtn('admin-login-btn',true,'AUTHENTICATING...');
-
-  try {
-    const res = await fetch('https://nzqqbigzuxdqyjszpnpy.supabase.co/functions/v1/admin-auth', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56cXFiaWd6dXhkcXlqc3pwbnB5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1OTIwNjYsImV4cCI6MjA5NDE2ODA2Nn0.87RRIFXvn34Au_denSm5W_XvIaxcwr6gMmSYXC_BOGc`
-      },
-      body: JSON.stringify({ password: pass })
-    });
-    const data = await res.json();
-    setBtn('admin-login-btn',false,'AUTHENTICATE ›');
-
-    if(data.success){
-      adminAuthed=true;
-      errEl.style.display='none';
-      document.getElementById('admin-login-screen').style.display='none';
-      document.getElementById('admin-dashboard').style.display='block';
-      document.getElementById('s-warn').value=cfg.warn_threshold;
-      document.getElementById('s-flag').value=cfg.flag_threshold;
-      toast('WELCOME KAZ');
-      await refreshStats();
-      startRealtime();
-    } else {
-      errEl.style.display='block';
-      errEl.textContent='AUTHENTICATION FAILED — INVALID PASSPHRASE';
-      await logAccess('UNKNOWN','ADMIN_FAIL','flag',null);
-    }
-  } catch(e) {
-    setBtn('admin-login-btn',false,'AUTHENTICATE ›');
-    errEl.style.display='block';
-    errEl.textContent='CONNECTION ERROR — TRY AGAIN';
-  }
-}
-function adminLogout(){
-  adminAuthed=false;
-  if(realtimeSub){db.removeChannel(realtimeSub);realtimeSub=null;}
-  document.getElementById('admin-dashboard').style.display='none';
-  document.getElementById('admin-login-screen').style.display='block';
-  document.getElementById('admin-pass-input').value='';
-  toast('LOGOUT');
-}
-
-// ══════════════════════════════════════════════
-//  STATS
-// ══════════════════════════════════════════════
-async function refreshStats(){
-  const{count:ac}=await db.from('agents').select('*',{count:'exact',head:true});
-  document.getElementById('stat-agents').textContent=ac??0;
-  const{data:kd}=await db.from('daily_keys').select('key').eq('date',todayStr()).maybeSingle();
-  const k=kd?.key||'—';
-  document.getElementById('stat-key').textContent=k;
-  document.getElementById('decode-key').value=k!=='—'?k:'';
-  const today=todayStr()+'T00:00:00';
-  today.setHours(0,0,0,0);
-  const{data:logs}=await db.from('access_log').select('flagged').gte('logged_at',today.toISOString());
-  document.getElementById('stat-warns').textContent=(logs||[]).filter(l=>l.flagged==='warn').length;
-  document.getElementById('stat-flags').textContent=(logs||[]).filter(l=>l.flagged==='flag').length;
-}
-
-// ══════════════════════════════════════════════
-//  AGENT REGISTRATION
-// ══════════════════════════════════════════════
-async function registerAgent(){
-  const codename=document.getElementById('reg-codename').value.trim().toUpperCase();
-  const password=document.getElementById('reg-password').value.trim()||genPassword();
-  if(!codename){toast('Enter a codename','terr');return;}
-  const{error}=await db.from('agents').insert({codename,password});
-  if(error){toast(error.code==='23505'?'Codename already in use':error.message,'terr');return;}
-  document.getElementById('reg-codename').value='';
-  document.getElementById('reg-password').value='';
-  toast(`AGENT ${codename} ENROLLED // PWD: ${password}`);
-  await refreshStats();
-  if(document.getElementById('tab-agents').classList.contains('active'))loadRoster();
-}
-
-// ══════════════════════════════════════════════
-//  ROSTER + EDIT/REMOVE
-// ══════════════════════════════════════════════
-async function loadRoster(){
-  document.getElementById('roster-loading').style.display='block';
-  document.getElementById('agent-table').style.display='none';
-  document.getElementById('roster-empty').style.display='none';
-  const{data:agents}=await db.from('agents').select('*').order('created_at');
-  const{data:logs}=await db.from('access_log').select('agent_id,flagged,action').gte('logged_at',todayStr());
-  document.getElementById('roster-loading').style.display='none';
-  if(!agents||!agents.length){document.getElementById('roster-empty').style.display='block';return;}
-  document.getElementById('agent-table').style.display='table';
-  const tbody=document.getElementById('agent-tbody');
-  tbody.innerHTML='';
-  agents.forEach(ag=>{
-    const agLogs=(logs||[]).filter(l=>l.agent_id===ag.id);
-    const lc=agLogs.filter(l=>l.action==='LOGIN').length;
-    let st='<span class="aok">NO ACCESS TODAY</span>';
-    if(lc===1)st='<span class="aok">✓ 1 LOGIN</span>';
-    else if(lc===2)st='<span class="awk">⚠ 2 LOGINS</span>';
-    else if(lc>=3)st=`<span class="afg">⛔ ${lc} LOGINS</span>`;
-    const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td><span class="cn">${esc(ag.codename)}</span></td>
-      <td class="reveal"><span class="redacted">${esc(ag.password)}</span></td>
-      <td style="font-size:11px;color:var(--text-dim);">${new Date(ag.created_at).toLocaleDateString('en-GB')}</td>
-      <td>${st}</td>
-      <td style="text-align:right;">
-        <div class="flex-gap" style="justify-content:flex-end;">
-          <button class="btn bs ba" onclick="openEditModal('${ag.id}','${esc(ag.codename)}','${esc(ag.password)}')">✎ EDIT</button>
-          <button class="btn bs br" onclick="removeAgent('${ag.id}','${esc(ag.codename)}')">✕ REMOVE</button>
-        </div>
-      </td>`;
-    tbody.appendChild(tr);
-  });
-}
-
-function openEditModal(id,codename,password){
-  document.getElementById('edit-agent-id').value=id;
-  document.getElementById('edit-codename').value=codename;
-  document.getElementById('edit-password').value=password;
-  document.getElementById('edit-modal').style.display='flex';
-}
-function closeEditModal(){
-  document.getElementById('edit-modal').style.display='none';
-}
-
-async function saveAgentEdit(){
-  const id=document.getElementById('edit-agent-id').value;
-  const codename=document.getElementById('edit-codename').value.trim().toUpperCase();
-  const password=document.getElementById('edit-password').value.trim();
-  if(!codename){toast('Codename cannot be empty','terr');return;}
-  if(!password){toast('Password cannot be empty','terr');return;}
-  const{error}=await db.from('agents').update({codename,password}).eq('id',id);
-  if(error){toast(error.code==='23505'?'Codename already in use by another agent':error.message,'terr');return;}
-  closeEditModal();
-  toast(`AGENT UPDATED — ${codename}`);
-  await refreshStats();
-  loadRoster();
-}
-
-async function removeAgent(id,codename){
-  if(!confirm(`Remove agent ${codename}? This cannot be undone.`))return;
-  await db.from('agents').delete().eq('id',id);
-  toast(`AGENT ${codename} REMOVED FROM ROSTER`);
-  await refreshStats();
-  loadRoster();
-}
-
-// ══════════════════════════════════════════════
-//  DAILY KEY
-// ══════════════════════════════════════════════
-async function setDailyKey(){
-  const k=document.getElementById('daily-key-input').value.trim().toUpperCase();
-  if(!k){toast('Enter a key','terr');return;}
-  const{error}=await db.from('daily_keys').upsert({key:k,date:todayStr()},{onConflict:'date'});
-  if(error){toast(error.message,'terr');return;}
-  toast(`DAILY KEY SET: ${k}`);
-  await refreshStats();
-}
-async function generateKey(){
-  const k=genKey();
-  document.getElementById('daily-key-input').value=k;
-  const{error}=await db.from('daily_keys').upsert({key:k,date:todayStr()},{onConflict:'date'});
-  if(error){toast(error.message,'terr');return;}
-  toast(`KEY GENERATED & SET: ${k}`);
-  await refreshStats();
-}
-
-// ══════════════════════════════════════════════
-//  DECODE
-// ══════════════════════════════════════════════
-function decodeMessage(){
-  const raw=document.getElementById('decode-input').value.trim();
-  const key=document.getElementById('decode-key').value.trim().toUpperCase();
-  if(!raw){toast('No message to decode','terr');return;}
-  if(!key){toast("No key — set today's key first",'terr');return;}
-  const plain=decrypt(raw,key);
-  const m=plain.match(/^([A-Z0-9_]+)SPLIT/);
-  const agentName=m?m[1]:'AGENT';
-  const msg=m?plain.substring(m[0].length).trim():plain;
-  document.getElementById('decode-output').style.display='block';
-  document.getElementById('decode-meta').textContent=`SOURCE: ${agentName} // KEY: ${key} // ${new Date().toLocaleTimeString()}`;
-  document.getElementById('decode-result').innerHTML=`<span style="color:var(--accent)">[${esc(agentName)}]</span> ${esc(msg)}`;
-  toast('MESSAGE DECRYPTED');
-}
-
-// ══════════════════════════════════════════════
-//  ACCESS LOG
-// ══════════════════════════════════════════════
-async function logAccess(codename,action,flagged,agentId){
-  await db.from('access_log').insert({agent_id:agentId||null,codename,action,flagged:flagged||''});
-}
-
-async function loadAccessLog(){
-  document.getElementById('log-loading').style.display='block';
-  document.getElementById('access-log-list').innerHTML='';
-  document.getElementById('log-empty').style.display='none';
-  const{data}=await db.from('access_log').select('*').order('logged_at',{ascending:false}).limit(300);
-  allLogs=data||[];
-  document.getElementById('log-loading').style.display='none';
-  renderLog();
-}
-
-function filterLog(f){
-  logFilter=f;
-  document.querySelectorAll('[id^=flt-]').forEach(b=>b.style.opacity='.4');
-  document.getElementById('flt-'+f).style.opacity='1';
-  renderLog();
-}
-
-function renderLog(){
-  const list=document.getElementById('access-log-list');
-  list.innerHTML='';
-  let entries=[...allLogs];
-  if(logFilter==='warn')entries=entries.filter(e=>e.flagged==='warn');
-  if(logFilter==='flag')entries=entries.filter(e=>e.flagged==='flag');
-  if(logFilter==='today')entries=entries.filter(e=>e.logged_at.startsWith(todayStr()));
-  if(!entries.length){document.getElementById('log-empty').style.display='block';return;}
-  document.getElementById('log-empty').style.display='none';
-  entries.forEach(entry=>{
-    const li=document.createElement('li');
-    li.className='log-entry';
-    const time=new Date(entry.logged_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    const fl=entry.flagged==='flag'?'<span class="lff">⛔ FLAG</span>':entry.flagged==='warn'?'<span class="lfw">⚠ WARN</span>':'';
-    li.innerHTML=`<span class="lt">${time}</span><span class="la">${esc(entry.codename)}</span><span class="lm">${esc(entry.action)}</span>${fl}`;
-    list.appendChild(li);
-  });
-}
-
-// ── Log clear actions ──
-async function clearTodayLogs(){
-  if(!confirm("DELETE ALL LOG ENTRIES FROM TODAY?"))return;
-  const start=todayStr()+'T00:00:00';
-  const{error}=await db.from('access_log').delete().gte('logged_at',start);
-  if(error){toast(error.message,'terr');return;}
-  allLogs=allLogs.filter(e=>!e.logged_at.startsWith(todayStr()));
-  renderLog();await refreshStats();
-  toast("TODAY'S LOGS CLEARED");
-}
-
-async function clearLoginLogs(){
-  if(!confirm("DELETE ALL LOGINS FROM TODAY? OTHER ENTRIES ARE KEPT"))return;
-  const{error}=await db.from('access_log').delete().eq('action','LOGIN');
-  if(error){toast(error.message,'terr');return;}
-  allLogs=allLogs.filter(e=>e.action!=='LOGIN');
-  renderLog();await refreshStats();
-  toast("ALL LOGIN ENTRIES CLEARED");
-}
-
-async function clearAllLogs(){
-  if(!confirm("⛔ WIPE ENTIRE DATABASE? KILL SWITCH. THIS CANNOT BE UNDONE. DONT DO IT KAZ"))return;
-  const{error}=await db.from('access_log').delete().neq('id','00000000-0000-0000-0000-000000000000');
-  if(error){toast(error.message,'terr');return;}
-  allLogs=[];
-  renderLog();await refreshStats();
-  toast("FULL AUDIT LOG WIPED");
-}
-
-async function clearOldLogs(){
-  if(!confirm("DELETE ALL LOG ENTRIES FROM BEFORE TODAY?"))return;
-  const{error}=await db.from('access_log').delete().lt('logged_at',todayStr());
-  if(error){toast(error.message,'terr');return;}
-  allLogs=allLogs.filter(e=>e.logged_at.startsWith(todayStr()));
-  renderLog();
-  toast("PRE-TODAY LOGS PURGED");
-}
-
-function startRealtime(){
-  if(realtimeSub)db.removeChannel(realtimeSub);
-  realtimeSub=db.channel('access_log_rt')
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'access_log'},async payload=>{
-      allLogs.unshift(payload.new);
-      if(document.getElementById('tab-log').classList.contains('active'))renderLog();
-      await refreshStats();
-      if(payload.new.flagged==='flag')toast(`⛔ FLAG — ${payload.new.codename}: ${payload.new.action}`,'terr');
-      else if(payload.new.flagged==='warn')toast(`⚠ WARN — ${payload.new.codename}: ${payload.new.action}`,'twrn');
-    }).subscribe();
-}
-
-// ══════════════════════════════════════════════
-//  SETTINGS
-// ══════════════════════════════════════════════
-async function changeAdminPass(){
-  const cur=document.getElementById('s-cur').value;
-  const nxt=document.getElementById('s-new').value;
-  const cnf=document.getElementById('s-conf').value;
-  if(cur!==cfg.admin_password){toast('Current password incorrect','terr');return;}
-  if(!nxt||nxt.length<6){toast('New passwordmust be 6+ characters','terr');return;}
-  if(nxt!==cnf){toast('Passwords do not match','terr');return;}
-  const{error}=await db.from('admin_settings').update({admin_password:nxt}).eq('id',1);
-  if(error){toast(error.message,'terr');return;}
-  cfg.admin_password=nxt;
-  ['s-cur','s-new','s-conf'].forEach(id=>document.getElementById(id).value='');
-  toast('PASSWORD UPDATED');
-}
-
-async function saveThresholds(){
-  const w=parseInt(document.getElementById('s-warn').value);
-  const f=parseInt(document.getElementById('s-flag').value);
-  if(w>=f){toast('Flag threshold must be greater than warn threshold','terr');return;}
-  const{error}=await db.from('admin_settings').update({warn_threshold:w,flag_threshold:f}).eq('id',1);
-  if(error){toast(error.message,'terr');return;}
-  cfg.warn_threshold=w;cfg.flag_threshold=f;
-  toast(`THRESHOLDS SAVED — WARN:${w} FLAG:${f}`);
-}
-
-// ══════════════════════════════════════════════
-//  AGENT PORTAL
-// ══════════════════════════════════════════════
-async function agentLogin(){
-  const pass=document.getElementById('agent-pass-input').value.trim();
-  const key=document.getElementById('agent-key-input').value.trim().toUpperCase();
-  const errEl=document.getElementById('agent-login-error');
-  setBtn('agent-login-btn',true,'NETRUNNING...');
-  const{data:agents}=await db.from('agents').select('*').eq('password',pass);
-  setBtn('agent-login-btn',false,'◈ ACCESS RELAY ›');
-  if(!agents||!agents.length){
-    errEl.style.display='block';errEl.textContent='AUTHENTICATION FAILED — INVALID CREDENTIALS';
-    await logAccess('AGENT','FAILED_LOGIN','flag',null);return;
-  }
-  const agent=agents[0];
-  if(!key){errEl.style.display='block';errEl.textContent='DAILY KEY REQUIRED';return;}
-  const{data:kd}=await db.from('daily_keys').select('key').eq('date',todayStr()).maybeSingle();
-  if(kd&&key!==kd.key){
-    errEl.style.display='block';errEl.textContent='INVALID KEY — ENTER CORRECT KEY';
-    await logAccess(agent.codename,'WRONG_KEY','flag',agent.id);return;
-  }
-  const{data:freshCfg}=await db.from('admin_settings').select('*').eq('id',1).single();
-  if(freshCfg)cfg=freshCfg;
-  const{data:todayL}=await db.from('access_log').select('id').eq('agent_id',agent.id).eq('action','LOGIN').gte('logged_at',todayStr());
-  const lc=(todayL?.length||0)+1;
-  let flagged='';
-  if(lc>=cfg.flag_threshold)flagged='flag';
-  else if(lc>=cfg.warn_threshold)flagged='warn';
-  await logAccess(agent.codename,'LOGIN',flagged,agent.id);
-  currentAgent={...agent,sessionKey:key};
-  errEl.style.display='none';
-  document.getElementById('agent-login-screen').style.display='none';
-  document.getElementById('agent-dashboard').style.display='block';
-  document.getElementById('agent-welcome').textContent=`AUTHENTICATED // CODENAME: ${agent.codename} // SESSION ACTIVE`;
-  if(lc>1){
-    const wb=document.getElementById('agent-warning-banner');
-    wb.style.display='block';
-    wb.textContent=lc>=cfg.flag_threshold
-      ?`${lc} logins today.`
-      :`This is your #${lc} login today.`;
-  }
-  toast(`CODENAME ${agent.codename} — RELAY ACTIVE`);
-}
-
-async function encryptAgentMessage(){
-  const raw=document.getElementById('agent-message-input').value.trim();
-  if(!raw){toast('No message to encrypt','terr');return;}
-  if(!currentAgent){toast('Session expired','terr');return;}
-  const tagged=`${currentAgent.codename}SPLIT${raw}`;
-  const enc=encrypt(tagged,currentAgent.sessionKey);
-  await logAccess(currentAgent.codename,'RELAY_SENT','',currentAgent.id);
-  document.getElementById('agent-encrypted-output').style.display='block';
-  document.getElementById('encrypted-text').textContent=enc;
-  toast('MESSAGE ENCRYPTED — READY TO RELAY');
-}
-
-function copyEncrypted(){
-  const txt=document.getElementById('encrypted-text').textContent;
-  navigator.clipboard.writeText(txt).then(()=>toast('COPIED TO CLIPBOARD')).catch(()=>{
-    const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('COPIED TO CLIPBOARD');
-  });
-}
-
-function clearAgentSession(){
-  currentAgent=null;
-  document.getElementById('agent-dashboard').style.display='none';
-  document.getElementById('agent-login-screen').style.display='block';
-  ['agent-pass-input','agent-key-input','agent-message-input'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('agent-encrypted-output').style.display='none';
-  document.getElementById('agent-warning-banner').style.display='none';
-  toast('SESSION CLEARED');
-}
-</script>
 </body>
 </html>
