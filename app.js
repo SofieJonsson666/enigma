@@ -2,7 +2,7 @@
 //  STATE
 // ══════════════════════════════════════════════
 let adminAuthed = false, currentAgent = null;
-let cfg = {  warn_threshold: 2, flag_threshold: 3 };
+let cfg = { admin_password: 'admin1234', warn_threshold: 2, flag_threshold: 3 };
 let allLogs = [], logFilter = 'all', realtimeSub = null;
 
 // ══════════════════════════════════════════════
@@ -411,25 +411,14 @@ async function changeAdminPass() {
   const cur = document.getElementById('s-cur').value;
   const nxt = document.getElementById('s-new').value;
   const cnf = document.getElementById('s-conf').value;
+  if (cur !== cfg.admin_password) { toast('Current password incorrect', 'terr'); return; }
   if (!nxt || nxt.length < 6) { toast('New password must be 6+ characters', 'terr'); return; }
   if (nxt !== cnf) { toast('Passwords do not match', 'terr'); return; }
-
-  try {
-    const res = await fetch('https://nzqqbigzuxdqyjszpnpy.supabase.co/functions/v1/admin-change-password', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SUPA_KEY}`
-      },
-      body: JSON.stringify({ currentPassword: cur, newPassword: nxt })
-    });
-    const data = await res.json();
-    if (!data.success) { toast(data.message || 'Failed', 'terr'); return; }
-    ['s-cur', 's-new', 's-conf'].forEach(id => document.getElementById(id).value = '');
-    toast('PASSWORD UPDATED');
-  } catch (e) {
-    toast('CONNECTION ERROR', 'terr');
-  }
+  const { error } = await db.from('admin_settings').update({ admin_password: nxt }).eq('id', 1);
+  if (error) { toast(error.message, 'terr'); return; }
+  cfg.admin_password = nxt;
+  ['s-cur', 's-new', 's-conf'].forEach(id => document.getElementById(id).value = '');
+  toast('PASSWORD UPDATED');
 }
 
 async function saveThresholds() {
@@ -490,8 +479,8 @@ async function agentLogin() {
     const wb = document.getElementById('agent-warning-banner');
     wb.style.display = 'block';
     wb.textContent = lc >= cfg.flag_threshold
-      ? `⛔ SECURITY ALERT: ${lc} logins detected on your account today. Command has been notified.`
-      : `⚠ WARNING: This is your #${lc} login today. Command has been notified.`;
+      ? `⛔ SECURITY ALERT: ${lc} Who are you?`
+      : `⚠ WARNING: This is your #${lc} login today. Double-check your password and key`;
   }
   toast(`CODENAME ${agent.codename} — RELAY ACTIVE`);
 }
