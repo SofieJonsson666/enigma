@@ -496,6 +496,16 @@ async function encryptAgentMessage() {
   if (!currentAgent) { toast('Session expired', 'terr'); return; }
   const tagged = `${currentAgent.codename}SPLIT${raw}`;
   const enc = encrypt(tagged, currentAgent.sessionKey);
+
+  // Save to messages table
+  const { error } = await db.from('messages').insert({
+    agent_id: currentAgent.id,
+    codename: currentAgent.codename,
+    encrypted_message: enc,
+    key_used: currentAgent.sessionKey
+  });
+  if (error) { toast('Failed to save message — ' + error.message, 'terr'); return; }
+
   await logAccess(currentAgent.codename, 'RELAY_SENT', '', currentAgent.id);
   document.getElementById('agent-encrypted-output').style.display = 'block';
   document.getElementById('encrypted-text').textContent = enc;
