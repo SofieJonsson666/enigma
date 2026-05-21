@@ -361,7 +361,6 @@ async function clearTodayLogs() {
   renderLog(); await refreshStats();
   toast("TODAY'S LOGS && MESSAGES CLEARED");
   if (!confirm("DELETE ALL LOG ENTRIES FROM TODAY?")) return;
-  const today = new Date(); today.setHours(0, 0, 0, 0);
   const { error } = await db.from('access_log').delete().gte('logged_at', today.toISOString());
   if (error) { toast(error.message, 'terr'); return; }
   allLogs = allLogs.filter(e => !e.logged_at.startsWith(todayStr()));
@@ -417,14 +416,25 @@ async function changeAdminPass() {
   const cur = document.getElementById('s-cur').value;
   const nxt = document.getElementById('s-new').value;
   const cnf = document.getElementById('s-conf').value;
-  if (cur !== cfg.admin_password) { toast('Current password incorrect', 'terr'); return; }
   if (!nxt || nxt.length < 6) { toast('New password must be 6+ characters', 'terr'); return; }
   if (nxt !== cnf) { toast('Passwords do not match', 'terr'); return; }
-  const { error } = await db.from('admin_settings').update({ admin_password: nxt }).eq('id', 1);
-  if (error) { toast(error.message, 'terr'); return; }
-  cfg.admin_password = nxt;
-  ['s-cur', 's-new', 's-conf'].forEach(id => document.getElementById(id).value = '');
-  toast('PASSWORD UPDATED');
+
+  try {
+    const res = await fetch('https://nzqqbigzuxdqyjszpnpy.supabase.co/functions/v1/admin-change-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPA_KEY}`
+      },
+      body: JSON.stringify({ currentPassword: cur, newPassword: nxt })
+    });
+    const data = await res.json();
+    if (!data.success) { toast(data.message || 'Failed', 'terr'); return; }
+    ['s-cur', 's-new', 's-conf'].forEach(id => document.getElementById(id).value = '');
+    toast('PASSWORD UPDATED');
+  } catch (e) {
+    toast('CONNECTION ERROR', 'terr');
+  }
 }
 
 async function saveThresholds() {
