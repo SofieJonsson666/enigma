@@ -394,14 +394,19 @@ async function clearOldLogs() {
 
 function startRealtime() {
   if (realtimeSub) db.removeChannel(realtimeSub);
-  realtimeSub = db.channel('access_log_rt')
+  realtimeSub = db.channel('realtime_updates')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'access_log' }, async payload => {
       allLogs.unshift(payload.new);
       if (document.getElementById('tab-log').classList.contains('active')) renderLog();
       await refreshStats();
       if (payload.new.flagged === 'flag') toast(`⛔ FLAG — ${payload.new.codename}: ${payload.new.action}`, 'terr');
       else if (payload.new.flagged === 'warn') toast(`⚠ WARN — ${payload.new.codename}: ${payload.new.action}`, 'twrn');
-    }).subscribe();
+    })
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async payload => {
+      if (document.getElementById('tab-messages').classList.contains('active')) loadAdminMessages();
+      toast(`◈ NEW INTEL — ${payload.new.codename}`);
+    })
+    .subscribe();
 }
 
 // ══════════════════════════════════════════════
