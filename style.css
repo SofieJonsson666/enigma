@@ -148,3 +148,17 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   .stat-row{flex-wrap:wrap;}
   .sc{min-width:calc(50% - 7px);}
 }
+
+/* ── AGENT PORTAL ── */
+.agent-id-bar{display:flex;align-items:center;justify-content:space-between;background:var(--panel);border:1px solid var(--border-lit);padding:16px 22px;margin-bottom:0;}
+.agent-id-codename{font-family:'Press Start 2P',monospace;font-size:14px;color:#fff;letter-spacing:4px;text-shadow:-1px 0 1px rgba(255,0,0,.5),1px 0 1px rgba(0,255,255,.5);}
+.agent-id-meta{font-size:11px;color:var(--text-dim);letter-spacing:2px;margin-top:6px;}
+
+.msg-card{background:var(--bg);border:1px solid var(--border);padding:16px;margin-bottom:12px;border-radius:1px;transition:border-color .2s;}
+.msg-card:hover{border-color:var(--border-lit);}
+.msg-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.msg-card-time{font-size:11px;color:var(--text-muted);letter-spacing:1px;}
+.msg-card-key{font-size:10px;color:var(--text-dim);letter-spacing:2px;background:var(--panel);padding:2px 8px;border:1px solid var(--border);}
+.msg-card-body{font-size:13px;color:var(--text);line-height:1.7;letter-spacing:.5px;}
+.msg-card-encrypted{font-size:10px;color:var(--text-muted);letter-spacing:1px;margin-top:8px;word-break:break-all;font-family:'Space Mono',monospace;cursor:pointer;}
+.msg-card-encrypted:hover{color:var(--text-dim);}

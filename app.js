@@ -2,7 +2,7 @@
 //  STATE
 // ══════════════════════════════════════════════
 let adminAuthed = false, currentAgent = null;
-let cfg = { admin_password: 'admin1234', warn_threshold: 2, flag_threshold: 3 };
+let cfg = {  warn_threshold: 2, flag_threshold: 3 };
 let allLogs = [], logFilter = 'all', realtimeSub = null;
 
 // ══════════════════════════════════════════════
@@ -51,6 +51,7 @@ function adminTab(name, btn) {
   if (btn) btn.classList.add('active');
   if (name === 'agents') loadRoster();
   if (name === 'log') loadAccessLog();
+  if (name === 'messages') loadAdminMessages();
 }
 
 // ══════════════════════════════════════════════
@@ -351,6 +352,14 @@ function renderLog() {
 }
 
 async function clearTodayLogs() {
+  if (!confirm("DELETE ALL LOG ENTRIES AND MESSAGES FROM TODAY?")) return;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const { error } = await db.from('access_log').delete().gte('logged_at', today.toISOString());
+  if (error) { toast(error.message, 'terr'); return; }
+  await db.from('messages').delete().gte('sent_at', today.toISOString());
+  allLogs = allLogs.filter(e => !e.logged_at.startsWith(todayStr()));
+  renderLog(); await refreshStats();
+  toast("TODAY'S LOGS && MESSAGES CLEARED");
   if (!confirm("DELETE ALL LOG ENTRIES FROM TODAY?")) return;
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const { error } = await db.from('access_log').delete().gte('logged_at', today.toISOString());
@@ -370,21 +379,23 @@ async function clearLoginLogs() {
 }
 
 async function clearAllLogs() {
-  if (!confirm("⛔ WIPE ENTIRE DATABASE? KILL SWITCH. THIS CANNOT BE UNDONE. DONT DO IT KAZ")) return;
+  if (!confirm("⛔ WIPE ENTIRE AUDIT LOG AND ALL MESSAGES? KILL SWITCH. THIS CANNOT BE UNDONE. DONT DO IT KAZ")) return;
   const { error } = await db.from('access_log').delete().neq('id', '00000000-0000-0000-0000-000000000000');
   if (error) { toast(error.message, 'terr'); return; }
+  await db.from('messages').delete().neq('id', '00000000-0000-0000-0000-000000000000');
   allLogs = [];
   renderLog(); await refreshStats();
-  toast("FULL AUDIT LOG WIPED");
+  toast("FULL AUDIT LOG AND MESSAGES WIPED");
 }
 
 async function clearOldLogs() {
-  if (!confirm("DELETE ALL LOG ENTRIES FROM BEFORE TODAY?")) return;
+  if (!confirm("DELETE ALL LOG ENTRIES AND MESSAGES FROM BEFORE TODAY?")) return;
   const { error } = await db.from('access_log').delete().lt('logged_at', todayStr());
   if (error) { toast(error.message, 'terr'); return; }
+  await db.from('messages').delete().lt('sent_at', todayStr());
   allLogs = allLogs.filter(e => e.logged_at.startsWith(todayStr()));
   renderLog();
-  toast("PRE-TODAY LOGS PURGED");
+  toast("PRE-TODAY LOGS AND MESSAGES PURGED");
 }
 
 function startRealtime() {
@@ -434,65 +445,50 @@ async function agentLogin() {
   const key = document.getElementById('agent-key-input').value.trim().toUpperCase();
   const errEl = document.getElementById('agent-login-error');
   setBtn('agent-login-btn', true, 'NETRUNNING...');
-
-  try {
-    const res = await fetch('https://nzqqbigzuxdqyjszpnpy.supabase.co/functions/v1/agent-auth', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SUPA_KEY}`
-      },
-      body: JSON.stringify({ password: pass, key: key })
-    });
-    const data = await res.json();
-    setBtn('agent-login-btn', false, '◈ ACCESS RELAY ›');
-
-    if (!data.success) {
-      errEl.style.display = 'block';
-      errEl.textContent = data.message === 'Invalid key'
-        ? 'INVALID KEY — ENTER CORRECT KEY'
-        : 'AUTHENTICATION FAILED — INVALID CREDENTIALS';
-      await logAccess('AGENT', 'FAILED_LOGIN', 'flag', null);
-      return;
-    }
-
-    // Agent authenticated — data.agent contains id and codename only, no password
-    const agent = data.agent;
-    const { data: freshCfg } = await db.from('admin_settings').select('*').eq('id', 1).single();
-    if (freshCfg) cfg = freshCfg;
-
-    // Check today's login count for flag/warn
-    const { data: todayL } = await db.from('access_log')
-      .select('id')
-      .eq('agent_id', agent.id)
-      .eq('action', 'LOGIN')
-      .gte('logged_at', todayStr());
-    const lc = (todayL?.length || 0) + 1;
-    let flagged = '';
-    if (lc >= cfg.flag_threshold) flagged = 'flag';
-    else if (lc >= cfg.warn_threshold) flagged = 'warn';
-    await logAccess(agent.codename, 'LOGIN', flagged, agent.id);
-
-    currentAgent = { ...agent, sessionKey: key };
-    errEl.style.display = 'none';
-    document.getElementById('agent-login-screen').style.display = 'none';
-    document.getElementById('agent-dashboard').style.display = 'block';
-    document.getElementById('agent-welcome').textContent = `AUTHENTICATED // CODENAME: ${agent.codename} // SESSION ACTIVE`;
-
-    if (lc > 1) {
-      const wb = document.getElementById('agent-warning-banner');
-      wb.style.display = 'block';
-      wb.textContent = lc >= cfg.flag_threshold
-        ? `${lc} logins today.`
-        : `This is your #${lc} login today.`;
-    }
-    toast(`CODENAME ${agent.codename} — RELAY ACTIVE`);
-
-  } catch (e) {
-    setBtn('agent-login-btn', false, '◈ ACCESS RELAY ›');
-    errEl.style.display = 'block';
-    errEl.textContent = 'CONNECTION ERROR — TRY AGAIN';
+  const { data: agents } = await db.from('agents').select('*').eq('password', pass);
+  setBtn('agent-login-btn', false, '◈ ACCESS RELAY ›');
+  if (!agents || !agents.length) {
+    errEl.style.display = 'block'; errEl.textContent = 'AUTHENTICATION FAILED — INVALID CREDENTIALS';
+    await logAccess('AGENT', 'FAILED_LOGIN', 'flag', null); return;
   }
+  const agent = agents[0];
+  if (!key) { errEl.style.display = 'block'; errEl.textContent = 'DAILY KEY REQUIRED'; return; }
+  const { data: kd } = await db.from('daily_keys').select('key').eq('date', todayStr()).maybeSingle();
+  if (kd && key !== kd.key) {
+    errEl.style.display = 'block'; errEl.textContent = 'INVALID KEY — ENTER CORRECT KEY';
+    await logAccess(agent.codename, 'WRONG_KEY', 'flag', agent.id); return;
+  }
+  const { data: freshCfg } = await db.from('admin_settings').select('*').eq('id', 1).single();
+  if (freshCfg) cfg = freshCfg;
+  const { data: todayL } = await db.from('access_log').select('id').eq('agent_id', agent.id).eq('action', 'LOGIN').gte('logged_at', todayStr());
+  const lc = (todayL?.length || 0) + 1;
+  let flagged = '';
+  if (lc >= cfg.flag_threshold) flagged = 'flag';
+  else if (lc >= cfg.warn_threshold) flagged = 'warn';
+  await logAccess(agent.codename, 'LOGIN', flagged, agent.id);
+  currentAgent = { ...agent, sessionKey: key };
+  errEl.style.display = 'none';
+  document.getElementById('agent-login-screen').style.display = 'none';
+  document.getElementById('agent-dashboard').style.display = 'block';
+
+  // Populate identity bar
+  document.getElementById('agent-id-codename').textContent = agent.codename;
+  document.getElementById('agent-id-meta').textContent =
+    `SESSION ACTIVE // KEY: ${key} // ${new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'})}`;
+
+  // Reset to relay tab on login
+  agentTab('relay', document.getElementById('atbtn-relay'));
+  document.getElementById('agent-encrypted-output').style.display = 'none';
+  document.getElementById('agent-message-input').value = '';
+
+  if (lc > 1) {
+    const wb = document.getElementById('agent-warning-banner');
+    wb.style.display = 'block';
+    wb.textContent = lc >= cfg.flag_threshold
+      ? `⛔ SECURITY ALERT: ${lc} logins detected on your account today. Command has been notified.`
+      : `⚠ WARNING: This is your #${lc} login today. Command has been notified.`;
+  }
+  toast(`CODENAME ${agent.codename} — RELAY ACTIVE`);
 }
 
 async function encryptAgentMessage() {
@@ -501,15 +497,6 @@ async function encryptAgentMessage() {
   if (!currentAgent) { toast('Session expired', 'terr'); return; }
   const tagged = `${currentAgent.codename}SPLIT${raw}`;
   const enc = encrypt(tagged, currentAgent.sessionKey);
-
-    // Save encrypted message to database
-    await db.from('messages').insert({
-    agent_id: currentAgent.id,
-    codename: currentAgent.codename,
-    encrypted_message: enc,
-    key_used: currentAgent.sessionKey
-  });
-
   await logAccess(currentAgent.codename, 'RELAY_SENT', '', currentAgent.id);
   document.getElementById('agent-encrypted-output').style.display = 'block';
   document.getElementById('encrypted-text').textContent = enc;
@@ -530,5 +517,128 @@ function clearAgentSession() {
   ['agent-pass-input', 'agent-key-input', 'agent-message-input'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('agent-encrypted-output').style.display = 'none';
   document.getElementById('agent-warning-banner').style.display = 'none';
+  document.getElementById('history-list').innerHTML = '';
+  document.getElementById('agent-id-codename').textContent = '—';
   toast('SESSION CLEARED');
+}
+
+// ══════════════════════════════════════════════
+//  AGENT PORTAL TABS
+// ══════════════════════════════════════════════
+function agentTab(name, btn) {
+  document.querySelectorAll('[id^=atbtn-]').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('[id^=atab-]').forEach(c => c.classList.remove('active'));
+  document.getElementById('atab-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'history') loadAgentHistory();
+}
+
+// ══════════════════════════════════════════════
+//  RESET RELAY (new message without logging out)
+// ══════════════════════════════════════════════
+function resetRelay() {
+  document.getElementById('agent-message-input').value = '';
+  document.getElementById('agent-encrypted-output').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════
+//  LOAD AGENT MESSAGE HISTORY
+// ══════════════════════════════════════════════
+async function loadAgentHistory() {
+  if (!currentAgent) return;
+  document.getElementById('history-loading').style.display = 'block';
+  document.getElementById('history-list').innerHTML = '';
+  document.getElementById('history-empty').style.display = 'none';
+
+  const { data: messages } = await db.from('messages')
+    .select('*')
+    .eq('agent_id', currentAgent.id)
+    .order('sent_at', { ascending: false });
+
+  document.getElementById('history-loading').style.display = 'none';
+
+  if (!messages || !messages.length) {
+    document.getElementById('history-empty').style.display = 'block';
+    return;
+  }
+
+  const list = document.getElementById('history-list');
+  messages.forEach(msg => {
+    // Decrypt the message to show plaintext
+    const decrypted = decrypt(msg.encrypted_message, msg.key_used);
+    // Strip the CODENAME SPLIT prefix
+    const m = decrypted.match(/^([A-Z0-9_]+)SPLIT/);
+    const plaintext = m ? decrypted.substring(m[0].length).trim() : decrypted;
+
+    const time = new Date(msg.sent_at).toLocaleString('en-GB', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+
+    const card = document.createElement('div');
+    card.className = 'msg-card';
+    card.innerHTML = `
+      <div class="msg-card-header">
+        <span class="msg-card-time">${time}</span>
+        <span class="msg-card-key">KEY: ${esc(msg.key_used)}</span>
+      </div>
+      <div class="msg-card-body">${esc(plaintext)}</div>
+      <div class="msg-card-encrypted" title="Click to copy encrypted version" onclick="copyText('${esc(msg.encrypted_message)}')">
+        ENCRYPTED: ${esc(msg.encrypted_message.substring(0, 60))}...
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function copyText(txt) {
+  navigator.clipboard.writeText(txt).then(() => toast('ENCRYPTED VERSION COPIED'));
+}
+
+// ══════════════════════════════════════════════
+//  ADMIN MESSAGES VIEW
+// ══════════════════════════════════════════════
+async function loadAdminMessages() {
+  document.getElementById('admin-msg-loading').style.display = 'block';
+  document.getElementById('admin-msg-list').innerHTML = '';
+  document.getElementById('admin-msg-empty').style.display = 'none';
+
+  const { data: messages } = await db.from('messages')
+    .select('*')
+    .order('sent_at', { ascending: false });
+
+  document.getElementById('admin-msg-loading').style.display = 'none';
+
+  if (!messages || !messages.length) {
+    document.getElementById('admin-msg-empty').style.display = 'block';
+    return;
+  }
+
+  const list = document.getElementById('admin-msg-list');
+  messages.forEach(msg => {
+    const decrypted = decrypt(msg.encrypted_message, msg.key_used);
+    const m = decrypted.match(/^([A-Z0-9_]+)SPLIT/);
+    const plaintext = m ? decrypted.substring(m[0].length).trim() : decrypted;
+    const time = new Date(msg.sent_at).toLocaleString('en-GB', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+
+    const card = document.createElement('div');
+    card.className = 'msg-card';
+    card.innerHTML = `
+      <div class="msg-card-header">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span class="cn" style="font-size:13px;">${esc(msg.codename)}</span>
+          <span class="msg-card-time">${time}</span>
+        </div>
+        <span class="msg-card-key">KEY: ${esc(msg.key_used)}</span>
+      </div>
+      <div class="msg-card-body">${esc(plaintext)}</div>
+      <div class="msg-card-encrypted" title="Click to copy encrypted" onclick="copyText('${msg.encrypted_message.replace(/'/g,"\\'")}')">
+        ENCRYPTED: ${esc(msg.encrypted_message.substring(0, 80))}...
+      </div>
+    `;
+    list.appendChild(card);
+  });
 }

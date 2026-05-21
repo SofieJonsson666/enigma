@@ -6,11 +6,7 @@
 <title>BEDROCK CORP PORTAL</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Oswald:wght@300;400;600&family=Space+Mono:wght@400;700&family=Press+Start+2P&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
-
-<!-- Supabase library -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- Styles -->
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -25,14 +21,8 @@
   <div class="modal">
     <div class="modal-title">EDIT AGENT</div>
     <input type="hidden" id="edit-agent-id">
-    <div class="field">
-      <label>CODENAME</label>
-      <input type="text" id="edit-codename" style="text-transform:uppercase;">
-    </div>
-    <div class="field">
-      <label>PASSWORD</label>
-      <input type="text" id="edit-password">
-    </div>
+    <div class="field"><label>CODENAME</label><input type="text" id="edit-codename" style="text-transform:uppercase;"></div>
+    <div class="field"><label>PASSWORD</label><input type="text" id="edit-password"></div>
     <div class="modal-actions">
       <button class="btn" onclick="saveAgentEdit()">◈ SAVE CHANGES</button>
       <button class="btn ba" onclick="closeEditModal()">✕ CANCEL</button>
@@ -62,7 +52,6 @@
 <!-- ════════════ ADMIN VIEW ════════════ -->
 <div class="view active" id="view-admin">
 
-  <!-- Login -->
   <div id="admin-login-screen">
     <div style="max-width:380px;margin:60px auto;">
       <div class="panel">
@@ -77,9 +66,7 @@
     </div>
   </div>
 
-  <!-- Dashboard -->
   <div id="admin-dashboard" style="display:none;">
-
     <div class="stat-row">
       <div class="sc"><div class="sn" id="stat-agents">—</div><div class="sl">ACTIVE AGENTS</div></div>
       <div class="sc"><div class="sn" id="stat-key" style="font-size:18px;padding-top:7px;">—</div><div class="sl">TODAY'S KEY</div></div>
@@ -90,6 +77,7 @@
     <div class="tab-row">
       <button class="tab-btn active" id="tbtn-ops" onclick="adminTab('ops',this)">OPERATIONS</button>
       <button class="tab-btn" id="tbtn-agents" onclick="adminTab('agents',this)">AGENTS</button>
+      <button class="tab-btn" id="tbtn-messages" onclick="adminTab('messages',this)">◈ INTEL FEED</button>
       <button class="tab-btn" id="tbtn-log" onclick="adminTab('log',this)"><span class="live-dot"></span>SURVEILLANCE</button>
       <button class="tab-btn" id="tbtn-settings" onclick="adminTab('settings',this)">SETTINGS</button>
     </div>
@@ -108,7 +96,6 @@
             </div>
             <button class="btn" onclick="registerAgent()">◈ ENROLL AGENT</button>
           </div>
-
           <div class="panel">
             <div class="ph"><div class="pt">DAILY KEY</div><div class="pb">CIPHER</div></div>
             <p class="dim small" style="margin-bottom:14px;">CHOOSE TODAYS CIPHER KEY.</p>
@@ -121,7 +108,6 @@
             </div>
           </div>
         </div>
-
         <div>
           <div class="panel" style="height:100%;">
             <div class="ph"><div class="pt">DECODE INCOMING INTEL</div><div class="pb">DECRYPT</div></div>
@@ -151,27 +137,35 @@
           <button class="btn bs" style="margin-left:auto;" onclick="adminTab('ops',document.getElementById('tbtn-ops'))">+ ENROLL NEW</button>
         </div>
         <div id="roster-loading" class="dim small">Loading agents...</div>
-        <div id="roster-empty" class="dim small" style="display:none;">No agents enrolled yet. Use the Operations tab to enroll.</div>
+        <div id="roster-empty" class="dim small" style="display:none;">No agents enrolled yet.</div>
         <table class="agent-table" id="agent-table" style="display:none;">
           <thead><tr>
-            <th>CODENAME</th>
-            <th>PASSWORD</th>
-            <th>ENROLLED</th>
-            <th>TODAY'S STATUS</th>
-            <th style="text-align:right;">ACTIONS</th>
+            <th>CODENAME</th><th>PASSWORD</th><th>ENROLLED</th><th>TODAY'S STATUS</th><th style="text-align:right;">ACTIONS</th>
           </tr></thead>
           <tbody id="agent-tbody"></tbody>
         </table>
       </div>
     </div>
 
+
+    <!-- MESSAGES TAB -->
+    <div class="tab-content" id="tab-messages">
+      <div class="panel">
+        <div class="ph">
+          <div class="pt">INTEL FEED</div>
+          <div class="pb">ALL AGENT TRANSMISSIONS</div>
+          <button class="btn bs" style="margin-left:auto;" onclick="loadAdminMessages()">↺ REFRESH</button>
+        </div>
+        <div id="admin-msg-loading" class="dim small">Loading messages...</div>
+        <div id="admin-msg-empty" class="dim small" style="display:none;">No messages received yet.</div>
+        <div id="admin-msg-list"></div>
+      </div>
+    </div>
+
     <!-- SURVEILLANCE TAB -->
     <div class="tab-content" id="tab-log">
       <div class="panel">
-        <div class="ph">
-          <div class="pt"><span class="live-dot"></span>LIVE SURVEILLANCE</div>
-          <div class="pb">REAL-TIME</div>
-        </div>
+        <div class="ph"><div class="pt"><span class="live-dot"></span>LIVE SURVEILLANCE</div><div class="pb">REAL-TIME</div></div>
         <div class="flex-gap" style="margin-bottom:14px;">
           <button class="btn bs" onclick="filterLog('all')" id="flt-all">ALL</button>
           <button class="btn bs ba" onclick="filterLog('warn')" id="flt-warn">WARNINGS</button>
@@ -197,12 +191,12 @@
     <div class="tab-content" id="tab-settings">
       <div class="g2">
         <div class="panel">
-          <div class="ph"><div class="pt">ADMIN CREDENTIALS - THIS DOESNT WORK</div><div class="pb">SECURITY</div></div>
-          <p class="dim small" style="margin-bottom:14px;">ASK SOFIE TO CHANGE PASSWORD</p>
-          <div class="field"><label>THIS WONT DO ANYTHING</label><input type="password" id="s-cur" placeholder="current..."></div>
-          <div class="field"><label>NAH BRO IT WONT WORK</label><input type="password" id="s-new" placeholder="new (6+ chars)..."></div>
-          <div class="field"><label>NOT IN TIME FOR THE EVENT</label><input type="password" id="s-conf" placeholder="confirm..."></div>
-          <button class="btn" onclick="changeAdminPass()">◈ NAH BRO</button>
+          <div class="ph"><div class="pt">CHANGE ADMIN PASSWORD</div><div class="pb">SECURITY</div></div>
+          <p class="dim small" style="margin-bottom:14px;">UPDATE YOUR ADMIN PASSWORD</p>
+          <div class="field"><label>CURRENT PASSWORD</label><input type="password" id="s-cur" placeholder="current..."></div>
+          <div class="field"><label>NEW PASSWORD</label><input type="password" id="s-new" placeholder="new (6+ chars)..."></div>
+          <div class="field"><label>CONFIRM NEW PASSWORD</label><input type="password" id="s-conf" placeholder="confirm..."></div>
+          <button class="btn" onclick="changeAdminPass()">◈ CHANGE PASSWORD</button>
         </div>
         <div class="panel">
           <div class="ph"><div class="pt">SECURITY THRESHOLDS</div><div class="pb">CONFIG</div></div>
@@ -218,7 +212,6 @@
         </div>
       </div>
     </div>
-
   </div><!-- /admin-dashboard -->
 </div><!-- /view-admin -->
 
@@ -226,12 +219,13 @@
 <!-- ════════════ AGENT PORTAL ════════════ -->
 <div class="view" id="view-agent">
 
+  <!-- ── AGENT LOGIN ── -->
   <div id="agent-login-screen">
     <div style="max-width:420px;margin:55px auto;">
       <div class="dim small" style="margin-bottom:8px;letter-spacing:2px;">&gt; BEDROCK CORP RELAY <span class="blink">_</span></div>
       <div class="panel">
         <div class="ph"><div class="pt">AGENT AUTHENTICATION</div></div>
-        <p class="dim small" style="margin-bottom:18px;">ENTER YOUR PASSWORD AND KEY PROVIDED BY COMMAND</p>
+        <p class="dim small" style="margin-bottom:18px;">ENTER YOUR PASSWORD AND TODAY'S KEY PROVIDED BY COMMAND.</p>
         <div class="field"><label>AGENT PASSWORD</label>
           <input type="password" id="agent-pass-input" placeholder="YOUR UNIQUE PASSWORD" onkeydown="if(event.key==='Enter')agentLogin()">
         </div>
@@ -244,41 +238,74 @@
     </div>
   </div>
 
+  <!-- ── AGENT DASHBOARD ── -->
   <div id="agent-dashboard" style="display:none;">
-    <div style="max-width:480px;margin:28px auto;">
-      <div class="sb" id="agent-welcome"></div>
-      <div id="agent-warning-banner" class="wb" style="display:none;"></div>
-      <div class="panel">
-        <div class="ph"><div class="pt">SECURE RELAY</div><div class="pb">ENCRYPT</div></div>
-        <p class="dim small" style="margin-bottom:14px;">TYPE YOUR MESSAGE. ENCRYPT.</p>
-        <div class="field"><label>INTEL / MESSAGE</label>
-          <textarea id="agent-message-input" placeholder="TYPE YOUR INTEL HERE...&#10;E.g: News of enemy operations in the pine forest"></textarea>
-        </div>
-        <button class="btn bf" onclick="encryptAgentMessage()">◈ ENCRYPT & PREPARE RELAY</button>
+
+    <!-- Agent identity bar -->
+    <div class="agent-id-bar">
+      <div class="agent-id-info">
+        <div class="agent-id-codename" id="agent-id-codename">—</div>
+        <div class="agent-id-meta" id="agent-id-meta">SESSION ACTIVE</div>
       </div>
-      <div id="agent-encrypted-output" style="display:none;">
+      <button class="btn bs ba" onclick="clearAgentSession()">✕ END SESSION</button>
+    </div>
+
+    <div id="agent-warning-banner" class="wb" style="display:none;margin-bottom:0;"></div>
+
+    <!-- Agent tabs -->
+    <div class="tab-row" style="margin-top:18px;">
+      <button class="tab-btn active" id="atbtn-relay" onclick="agentTab('relay',this)">◈ SECURE RELAY</button>
+      <button class="tab-btn" id="atbtn-history" onclick="agentTab('history',this)">◇ MESSAGE HISTORY</button>
+    </div>
+
+    <!-- RELAY TAB -->
+    <div class="tab-content active" id="atab-relay">
+      <div style="max-width:600px;">
         <div class="panel">
-          <div class="ph"><div class="pt">ENCRYPTED RELAY</div><div class="pb">TRANSMIT</div></div>
-          <p class="dim small" style="margin-bottom:10px;">COPY AND SEND VIA ANY IN-GAME CHANNEL. BOOK, COURIER, PUBLIC CHAT, ETC. YOUR MESSAGE IS ENCRYPTED. CLEAR YOUR SESSION WHEN DONE.</p>
-          <div class="cipher-display" id="encrypted-text"></div>
-          <div class="flex-gap" style="margin-top:14px;">
-            <button class="btn" onclick="copyEncrypted()">◈ COPY</button>
-            <button class="btn ba" onclick="clearAgentSession()">✕ CLEAR SESSION</button>
+          <div class="ph"><div class="pt">COMPOSE INTEL</div><div class="pb">ENCRYPT & SEND</div></div>
+          <p class="dim small" style="margin-bottom:14px;">TYPE YOUR MESSAGE BELOW. IT WILL BE ENCRYPTED WITH TODAY'S KEY BEFORE TRANSMISSION.</p>
+          <div class="field"><label>INTEL / MESSAGE</label>
+            <textarea id="agent-message-input" placeholder="TYPE YOUR INTEL HERE...&#10;E.g: News of enemy operations in the pine forest"></textarea>
+          </div>
+          <button class="btn bf" onclick="encryptAgentMessage()">◈ ENCRYPT & PREPARE RELAY</button>
+        </div>
+
+        <div id="agent-encrypted-output" style="display:none;">
+          <div class="panel">
+            <div class="ph"><div class="pt">ENCRYPTED RELAY</div><div class="pb">TRANSMIT</div></div>
+            <p class="dim small" style="margin-bottom:10px;">COPY AND SEND VIA ANY IN-GAME CHANNEL. BOOK, COURIER, PUBLIC CHAT, ETC. CLEAR YOUR SESSION WHEN DONE.</p>
+            <div class="cipher-display" id="encrypted-text"></div>
+            <div class="flex-gap" style="margin-top:14px;">
+              <button class="btn" onclick="copyEncrypted()">◈ COPY</button>
+              <button class="btn ba" onclick="resetRelay()">✕ NEW MESSAGE</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
+    <!-- HISTORY TAB -->
+    <div class="tab-content" id="atab-history">
+      <div class="panel">
+        <div class="ph">
+          <div class="pt">MESSAGE HISTORY</div>
+          <div class="pb">YOUR TRANSMISSIONS</div>
+          <button class="btn bs" style="margin-left:auto;" onclick="loadAgentHistory()">↺ REFRESH</button>
+        </div>
+        <div id="history-loading" class="dim small">Loading messages...</div>
+        <div id="history-empty" class="dim small" style="display:none;">No messages sent yet.</div>
+        <div id="history-list"></div>
+      </div>
+    </div>
+
+  </div><!-- /agent-dashboard -->
 </div><!-- /view-agent -->
 </div><!-- /main -->
 
 <div class="toast" id="toast"></div>
 
-<!-- Scripts: load order matters — supabase config first, then app logic -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
 <script src="app.js"></script>
-
 </body>
 </html>
