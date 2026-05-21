@@ -353,19 +353,14 @@ function renderLog() {
 
 async function clearTodayLogs() {
   if (!confirm("DELETE ALL LOG ENTRIES AND MESSAGES FROM TODAY?")) return;
-  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   const { error } = await db.from('access_log').delete().gte('logged_at', today.toISOString());
   if (error) { toast(error.message, 'terr'); return; }
   await db.from('messages').delete().gte('sent_at', today.toISOString());
   allLogs = allLogs.filter(e => !e.logged_at.startsWith(todayStr()));
   renderLog(); await refreshStats();
-  toast("TODAY'S LOGS && MESSAGES CLEARED");
-  if (!confirm("DELETE ALL LOG ENTRIES FROM TODAY?")) return;
-  const { error } = await db.from('access_log').delete().gte('logged_at', today.toISOString());
-  if (error) { toast(error.message, 'terr'); return; }
-  allLogs = allLogs.filter(e => !e.logged_at.startsWith(todayStr()));
-  renderLog(); await refreshStats();
-  toast("TODAY'S LOGS CLEARED");
+  toast("TODAY'S LOGS & MESSAGES CLEARED");
 }
 
 async function clearLoginLogs() {
