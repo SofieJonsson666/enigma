@@ -404,22 +404,63 @@ async function decodeMessage() {
   if (!raw) { toast('No message to decode', 'terr'); return; }
   if (!key) { toast("No key — set today's key first", 'terr'); return; }
 
-  // Look up cipher stack from database by matching encrypted message
+  // Look up the message record by encrypted text
   let stack = 'VIG+NOISE';
+  let msgId = null;
   const { data: msgRecord } = await db.from('messages')
-    .select('cipher_stack')
+    .select('id, cipher_stack')
     .eq('encrypted_message', raw)
     .maybeSingle();
   if (msgRecord?.cipher_stack) stack = msgRecord.cipher_stack;
+  if (msgRecord?.id) msgId = msgRecord.id;
 
-  const plain = decrypt(raw, key, stack);
-  const m = plain.match(/^([A-Z0-9_]+)SPLIT/);
-  const agentName = m ? m[1] : 'AGENT';
-  const msg = m ? plain.substring(m[0].length).trim() : plain;
+  // Attempt decryption
+  let plain, agentName, msg, decryptOk;
+  try {
+    plain = decrypt(raw, key, stack);
+    const m = plain.match(/^([A-Z0-9_]+)SPLIT/);
+    agentName = m ? m[1] : 'UNKNOWN';
+    msg = m ? plain.substring(m[0].length).trim() : plain;
+    decryptOk = !!m; // only truly successful if SPLIT pattern found
+  } catch(e) {
+    agentName = 'UNKNOWN';
+    msg = '[DECRYPTION FAILED — WRONG KEY OR CORRUPTED MESSAGE]';
+    plain = msg;
+    decryptOk = false;
+  }
+
+  // Save processed result to database
+  if (msgId) {
+    await db.from('messages').update({
+      decrypted_message: decryptOk ? msg : '[FAILED: ' + raw.substring(0,40) + '...]',
+      processed: true,
+      processed_at: new Date().toISOString()
+    }).eq('id', msgId);
+  } else {
+    // Message not in DB (manually typed cipher) — save as a new record
+    await db.from('messages').insert({
+      agent_id: null,
+      codename: agentName,
+      encrypted_message: raw,
+      key_used: key,
+      cipher_stack: stack,
+      decrypted_message: decryptOk ? msg : '[FAILED: ' + raw.substring(0,40) + '...]',
+      processed: true,
+      processed_at: new Date().toISOString()
+    });
+  }
+
+  // Show result on screen
   document.getElementById('decode-output').style.display = 'block';
-  document.getElementById('decode-meta').textContent = `SOURCE: ${agentName} // KEY: ${key} // STACK: ${stack} // ${new Date().toLocaleTimeString()}`;
-  document.getElementById('decode-result').innerHTML = `<span style="color:var(--accent)">[${esc(agentName)}]</span> ${esc(msg)}`;
-  toast('MESSAGE DECRYPTED');
+  document.getElementById('decode-meta').textContent =
+    `SOURCE: ${agentName} // KEY: ${key} // STACK: ${stack} // ${new Date().toLocaleTimeString()}`;
+  document.getElementById('decode-result').innerHTML = decryptOk
+    ? `<span style="color:var(--accent)">[${esc(agentName)}]</span> ${esc(msg)}`
+    : `<span style="color:var(--alert)">[DECRYPTION FAILED]</span> ${esc(raw.substring(0,80))}...`;
+  toast(decryptOk ? 'MESSAGE DECRYPTED & LOGGED' : 'DECRYPTION FAILED — LOGGED AS CORRUPTED');
+
+  // Refresh intel feed if open
+  if (document.getElementById('tab-messages').classList.contains('active')) loadAdminMessages();
 }
 
 // ══════════════════════════════════════════════
@@ -723,7 +764,8 @@ async function loadAdminMessages() {
 
   const { data: messages } = await db.from('messages')
     .select('*')
-    .order('sent_at', { ascending: false });
+    .eq('processed', true)
+    .order('processed_at', { ascending: false });
 
   document.getElementById('admin-msg-loading').style.display = 'none';
 
@@ -734,27 +776,26 @@ async function loadAdminMessages() {
 
   const list = document.getElementById('admin-msg-list');
   messages.forEach(msg => {
-    const decrypted = decrypt(msg.encrypted_message, msg.key_used, msg.cipher_stack);
-    const m = decrypted.match(/^([A-Z0-9_]+)SPLIT/);
-    const plaintext = m ? decrypted.substring(m[0].length).trim() : decrypted;
-    const time = new Date(msg.sent_at).toLocaleString('en-GB', {
+    const plaintext = msg.decrypted_message || '[NO DECRYPTED CONTENT]';
+    const time = new Date(msg.processed_at).toLocaleString('en-GB', {
       day: '2-digit', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit'
     });
-
+    const failed = plaintext.startsWith('[FAILED') || plaintext.startsWith('[DECRYPTION');
     const card = document.createElement('div');
     card.className = 'msg-card';
+    card.style.borderColor = failed ? 'var(--alert-dim)' : '';
     card.innerHTML = `
       <div class="msg-card-header">
         <div style="display:flex;align-items:center;gap:12px;">
-          <span class="cn" style="font-size:13px;">${esc(msg.codename)}</span>
+          <span class="cn" style="font-size:13px;">${esc(msg.codename || 'UNKNOWN')}</span>
           <span class="msg-card-time">${time}</span>
         </div>
-        <span class="msg-card-key">KEY: ${esc(msg.key_used)}</span>
+        <span class="msg-card-key">KEY: ${esc(msg.key_used || '?')}</span>
       </div>
-      <div class="msg-card-body">${esc(plaintext)}</div>
+      <div class="msg-card-body" style="color:${failed ? 'var(--alert)' : ''}">${esc(plaintext)}</div>
       <div class="msg-card-encrypted" title="Click to copy encrypted" onclick="copyText('${msg.encrypted_message.replace(/'/g,"\\'")}')">
-        ENCRYPTED: ${esc(msg.encrypted_message.substring(0, 80))}...
+        ENCRYPTED: ${esc((msg.encrypted_message || '').substring(0, 80))}...
       </div>
     `;
     list.appendChild(card);
