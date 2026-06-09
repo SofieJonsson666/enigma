@@ -108,14 +108,15 @@
             </div>
           </div>
         </div>
+
         <div>
           <div class="panel" style="height:100%;">
             <div class="ph"><div class="pt">DECODE INCOMING INTEL</div><div class="pb">DECRYPT</div></div>
-            <p class="dim small" style="margin-bottom:14px;">PASTE CODED MESSAGE.</p>
+            <p class="dim small" style="margin-bottom:14px;">PASTE CODED MESSAGE. CIPHER STACK IS LOOKED UP AUTOMATICALLY.</p>
             <div class="field"><label>ENCRYPTED MESSAGE</label>
               <textarea id="decode-input" placeholder="Paste scrambled text here..." style="min-height:130px;"></textarea>
             </div>
-            <div class="field"><label>DECODE KEY (auto-filled)</label>
+            <div class="field"><label>DECODE KEY (auto-filled from today)</label>
               <input type="text" id="decode-key" placeholder="key..." style="text-transform:uppercase;letter-spacing:3px;">
             </div>
             <button class="btn" onclick="decodeMessage()">◈ DECRYPT MESSAGE</button>
@@ -146,7 +147,6 @@
         </table>
       </div>
     </div>
-
 
     <!-- MESSAGES TAB -->
     <div class="tab-content" id="tab-messages">
@@ -219,7 +219,6 @@
 <!-- ════════════ AGENT PORTAL ════════════ -->
 <div class="view" id="view-agent">
 
-  <!-- ── AGENT LOGIN ── -->
   <div id="agent-login-screen">
     <div style="max-width:420px;margin:55px auto;">
       <div class="dim small" style="margin-bottom:8px;letter-spacing:2px;">&gt; BEDROCK CORP RELAY <span class="blink">_</span></div>
@@ -238,10 +237,8 @@
     </div>
   </div>
 
-  <!-- ── AGENT DASHBOARD ── -->
   <div id="agent-dashboard" style="display:none;">
 
-    <!-- Agent identity bar -->
     <div class="agent-id-bar">
       <div class="agent-id-info">
         <div class="agent-id-codename" id="agent-id-codename">—</div>
@@ -252,7 +249,6 @@
 
     <div id="agent-warning-banner" class="wb" style="display:none;margin-bottom:0;"></div>
 
-    <!-- Agent tabs -->
     <div class="tab-row" style="margin-top:18px;">
       <button class="tab-btn active" id="atbtn-relay" onclick="agentTab('relay',this)">◈ SECURE RELAY</button>
       <button class="tab-btn" id="atbtn-history" onclick="agentTab('history',this)">◇ MESSAGE HISTORY</button>
