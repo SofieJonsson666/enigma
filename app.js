@@ -398,12 +398,20 @@ async function generateKey() {
 // ══════════════════════════════════════════════
 //  DECODE
 // ══════════════════════════════════════════════
-function decodeMessage() {
+async function decodeMessage() {
   const raw = document.getElementById('decode-input').value.trim();
   const key = document.getElementById('decode-key').value.trim().toUpperCase();
-  const stack = document.getElementById('decode-stack').value.trim().toUpperCase() || 'VIG+NOISE';
   if (!raw) { toast('No message to decode', 'terr'); return; }
   if (!key) { toast("No key — set today's key first", 'terr'); return; }
+
+  // Look up cipher stack from database by matching encrypted message
+  let stack = 'VIG+NOISE';
+  const { data: msgRecord } = await db.from('messages')
+    .select('cipher_stack')
+    .eq('encrypted_message', raw)
+    .maybeSingle();
+  if (msgRecord?.cipher_stack) stack = msgRecord.cipher_stack;
+
   const plain = decrypt(raw, key, stack);
   const m = plain.match(/^([A-Z0-9_]+)SPLIT/);
   const agentName = m ? m[1] : 'AGENT';
