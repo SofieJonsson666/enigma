@@ -55,37 +55,142 @@ function adminTab(name, btn) {
 }
 
 // ══════════════════════════════════════════════
-//  CIPHER — Vigenère + noise
+//  CIPHER STACK — 5 ciphers, 2 picked randomly
 // ══════════════════════════════════════════════
-function vigenere(text, key, enc) {
+
+// ── Vigenère ──
+function cipherVIG(text, key, enc) {
   const K = key.toUpperCase().replace(/[^A-Z]/g, '');
   if (!K.length) return text;
   let res = '', ki = 0;
   for (let i = 0; i < text.length; i++) {
     const c = text[i], code = c.charCodeAt(0), shift = K.charCodeAt(ki % K.length) - 65;
-    if (code >= 65 && code <= 90) { res += String.fromCharCode((enc ? (code - 65 + shift) % 26 : (code - 65 - shift + 26) % 26) + 65); ki++; }
-    else if (code >= 97 && code <= 122) { res += String.fromCharCode((enc ? (code - 97 + shift) % 26 : (code - 97 - shift + 26) % 26) + 97); ki++; }
+    if (code >= 65 && code <= 90) { res += String.fromCharCode((enc ? (code-65+shift)%26 : (code-65-shift+26)%26)+65); ki++; }
+    else if (code >= 97 && code <= 122) { res += String.fromCharCode((enc ? (code-97+shift)%26 : (code-97-shift+26)%26)+97); ki++; }
     else if (code === 32) { res += ' '; }
-    else { res += enc ? String.fromCharCode(((code + shift) % 94) + 33) : String.fromCharCode(((code - 33 - shift % 94) % 94 + 94) % 94 + 33); ki++; }
+    else { res += enc ? String.fromCharCode(((code+shift)%94)+33) : String.fromCharCode(((code-33-shift%94)%94+94)%94+33); ki++; }
   }
   return res;
 }
 
-function noise(text, key, enc) {
+// ── Noise ──
+function cipherNOISE(text, key, enc) {
   const K = key.toUpperCase().replace(/[^A-Z]/g, '') || 'A';
   return text.split('').map((c, i) => {
     const code = c.charCodeAt(0);
     if (code === 32) return ' ';
     if (code >= 33 && code <= 126) {
       const s = K.charCodeAt((i * 3) % K.length) % 10;
-      return String.fromCharCode(enc ? ((code - 33 + s) % 94) + 33 : ((code - 33 - s + 94) % 94) + 33);
+      return String.fromCharCode(enc ? ((code-33+s)%94)+33 : ((code-33-s+94)%94)+33);
     }
     return c;
   }).join('');
 }
 
-const encrypt = (t, k) => noise(vigenere(t, k, true), k, true);
-const decrypt = (t, k) => vigenere(noise(t, k, false), k, false);
+// ── Atbash — reverses the alphabet (A↔Z), no key needed ──
+function cipherATB(text, enc) {
+  return text.split('').map(c => {
+    const code = c.charCodeAt(0);
+    if (code >= 65 && code <= 90) return String.fromCharCode(90 - (code - 65));
+    if (code >= 97 && code <= 122) return String.fromCharCode(122 - (code - 97));
+    return c;
+  }).join('');
+}
+
+// ── Caesar ROT — shifts by key length ──
+function cipherROT(text, key, enc) {
+  const shift = (key.replace(/[^A-Za-z]/g,'').length % 25) + 1;
+  return text.split('').map(c => {
+    const code = c.charCodeAt(0);
+    if (code >= 65 && code <= 90) return String.fromCharCode((enc ? (code-65+shift)%26 : (code-65-shift+26)%26)+65);
+    if (code >= 97 && code <= 122) return String.fromCharCode((enc ? (code-97+shift)%26 : (code-97-shift+26)%26)+97);
+    return c;
+  }).join('');
+}
+
+// ── Rail Fence — zigzag transposition ──
+function cipherRAIL(text, enc) {
+  const rails = 3;
+  if (!enc) {
+    // Decrypt: figure out pattern lengths then rebuild
+    const pattern = [];
+    let r = 0, dir = 1;
+    for (let i = 0; i < text.length; i++) { pattern.push(r); r += dir; if (r === rails-1 || r === 0) dir = -dir; }
+    const rows = Array.from({length: rails}, () => []);
+    const sorted = [...pattern].sort((a,b)=>a-b);
+    const counts = Array(rails).fill(0);
+    pattern.forEach(r => counts[r]++);
+    const offsets = [0];
+    for (let i = 0; i < rails-1; i++) offsets.push(offsets[i]+counts[i]);
+    const indices = Array(rails).fill(0);
+    let out = Array(text.length);
+    pattern.forEach((r, i) => { out[i] = text[offsets[r]+indices[r]]; indices[r]++; });
+    return out.join('');
+  }
+  const rows = Array.from({length: rails}, () => []);
+  let r = 0, dir = 1;
+  for (let i = 0; i < text.length; i++) { rows[r].push(text[i]); r += dir; if (r === rails-1 || r === 0) dir = -dir; }
+  return rows.flat().join('');
+}
+
+// ── Columnar Transposition ──
+function cipherCOL(text, key, enc) {
+  const K = key.toUpperCase().replace(/[^A-Z]/g,'') || 'KEY';
+  const cols = Math.min(K.length, 8);
+  const order = [...K.substring(0,cols)].map((c,i)=>({c,i})).sort((a,b)=>a.c.localeCompare(b.c)).map(x=>x.i);
+  if (enc) {
+    const rows = [];
+    for (let i = 0; i < text.length; i += cols) rows.push(text.substring(i,i+cols).padEnd(cols,'~'));
+    return order.map(c => rows.map(r=>r[c]).join('')).join('');
+  } else {
+    const totalRows = Math.ceil(text.length / cols);
+    const chunkLen = totalRows;
+    const chunks = order.map((_,i) => text.substring(i*chunkLen,(i+1)*chunkLen));
+    let out = '';
+    for (let r = 0; r < totalRows; r++) order.forEach((_,i) => { const idx = order.indexOf(i); out += chunks[idx][r]||''; });
+    return out.replace(/~+$/, '');
+  }
+}
+
+// ── Cipher pool ──
+const CIPHER_POOL = ['VIG','NOISE','ATB','ROT','RAIL','COL'];
+
+// ── Apply a single cipher by ID ──
+function applyCipher(text, id, key, enc) {
+  switch(id) {
+    case 'VIG':   return cipherVIG(text, key, enc);
+    case 'NOISE': return cipherNOISE(text, key, enc);
+    case 'ATB':   return cipherATB(text, enc);
+    case 'ROT':   return cipherROT(text, key, enc);
+    case 'RAIL':  return cipherRAIL(text, enc);
+    case 'COL':   return cipherCOL(text, key, enc);
+    default:      return text;
+  }
+}
+
+// ── Pick 2 random ciphers ──
+function pickCipherStack() {
+  const pool = [...CIPHER_POOL];
+  const a = pool.splice(Math.floor(Math.random()*pool.length),1)[0];
+  const b = pool.splice(Math.floor(Math.random()*pool.length),1)[0];
+  return [a, b];
+}
+
+// ── Encrypt with stack ──
+function encrypt(text, key) {
+  const stack = pickCipherStack();
+  let result = text;
+  for (const id of stack) result = applyCipher(result, id, key, true);
+  return { encrypted: result, stack: stack.join('+') };
+}
+
+// ── Decrypt with stack ──
+function decrypt(text, key, stackStr) {
+  const stack = (stackStr || 'VIG+NOISE').split('+').reverse();
+  let result = text;
+  for (const id of stack) result = applyCipher(result, id, key, false);
+  return result;
+}
 
 // ══════════════════════════════════════════════
 //  UTILS
@@ -296,14 +401,15 @@ async function generateKey() {
 function decodeMessage() {
   const raw = document.getElementById('decode-input').value.trim();
   const key = document.getElementById('decode-key').value.trim().toUpperCase();
+  const stack = document.getElementById('decode-stack').value.trim().toUpperCase() || 'VIG+NOISE';
   if (!raw) { toast('No message to decode', 'terr'); return; }
   if (!key) { toast("No key — set today's key first", 'terr'); return; }
-  const plain = decrypt(raw, key);
+  const plain = decrypt(raw, key, stack);
   const m = plain.match(/^([A-Z0-9_]+)SPLIT/);
   const agentName = m ? m[1] : 'AGENT';
   const msg = m ? plain.substring(m[0].length).trim() : plain;
   document.getElementById('decode-output').style.display = 'block';
-  document.getElementById('decode-meta').textContent = `SOURCE: ${agentName} // KEY: ${key} // ${new Date().toLocaleTimeString()}`;
+  document.getElementById('decode-meta').textContent = `SOURCE: ${agentName} // KEY: ${key} // STACK: ${stack} // ${new Date().toLocaleTimeString()}`;
   document.getElementById('decode-result').innerHTML = `<span style="color:var(--accent)">[${esc(agentName)}]</span> ${esc(msg)}`;
   toast('MESSAGE DECRYPTED');
 }
@@ -490,21 +596,21 @@ async function encryptAgentMessage() {
   if (!raw) { toast('No message to encrypt', 'terr'); return; }
   if (!currentAgent) { toast('Session expired', 'terr'); return; }
   const tagged = `${currentAgent.codename}SPLIT${raw}`;
-  const enc = encrypt(tagged, currentAgent.sessionKey);
+  const { encrypted: enc, stack } = encrypt(tagged, currentAgent.sessionKey);
 
-  // Save to messages table
   const { error: msgError } = await db.from('messages').insert({
     agent_id: currentAgent.id,
     codename: currentAgent.codename,
     encrypted_message: enc,
-    key_used: currentAgent.sessionKey
+    key_used: currentAgent.sessionKey,
+    cipher_stack: stack
   });
   if (msgError) { toast('Failed to save message: ' + msgError.message, 'terr'); return; }
 
   await logAccess(currentAgent.codename, 'RELAY_SENT', '', currentAgent.id);
   document.getElementById('agent-encrypted-output').style.display = 'block';
   document.getElementById('encrypted-text').textContent = enc;
-  toast('MESSAGE ENCRYPTED — READY TO RELAY');
+  toast(`MESSAGE ENCRYPTED — RELAY READY`);
 }
 
 function copyEncrypted() {
@@ -569,7 +675,7 @@ async function loadAgentHistory() {
   const list = document.getElementById('history-list');
   messages.forEach(msg => {
     // Decrypt the message to show plaintext
-    const decrypted = decrypt(msg.encrypted_message, msg.key_used);
+    const decrypted = decrypt(msg.encrypted_message, msg.key_used, msg.cipher_stack);
     // Strip the CODENAME SPLIT prefix
     const m = decrypted.match(/^([A-Z0-9_]+)SPLIT/);
     const plaintext = m ? decrypted.substring(m[0].length).trim() : decrypted;
@@ -620,7 +726,7 @@ async function loadAdminMessages() {
 
   const list = document.getElementById('admin-msg-list');
   messages.forEach(msg => {
-    const decrypted = decrypt(msg.encrypted_message, msg.key_used);
+    const decrypted = decrypt(msg.encrypted_message, msg.key_used, msg.cipher_stack);
     const m = decrypted.match(/^([A-Z0-9_]+)SPLIT/);
     const plaintext = m ? decrypted.substring(m[0].length).trim() : decrypted;
     const time = new Date(msg.sent_at).toLocaleString('en-GB', {
